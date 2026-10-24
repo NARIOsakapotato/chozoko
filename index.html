@@ -1826,7 +1826,7 @@ function startApp(){
   try{ cached=JSON.parse(localStorage.getItem("SNAP_V1")||"null"); }catch(e){ cached=null; }
   if(cached && cached.pallets && cached.config){
     try{
-      S=cached; UI.stamp=null;
+      S=cached; S.lite=1; UI.stamp=null; /* キャッシュは履歴間引き・明細なしの可能性があるため軽量扱い */
       renderAll();
       document.getElementById("boot").style.display="none";
       toast("前回のデータを表示中 — 確認しています…");
