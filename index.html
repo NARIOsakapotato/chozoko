@@ -1,0 +1,2601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<style>
+:root{
+  --bg:#f4f5f2; --panel:#fff; --ink:#23211e; --muted:#7c756c; --line:#dcd7cf;
+  --accent:#8a5a2b; --accent2:#c98a3f; --ok:#3f7d4e; --warn:#c06a1f; --danger:#b03a2e;
+  --w1:#5b8fb9; --w2:#7a9e5b;
+  --g-sho:#8ec4e6; --g-chu:#8fd8ae; --g-dai:#f6c76a; --g-kizu:#e8a672; --g-byo:#d97b70; --g-non:#c9c3ba;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+header{background:var(--accent);color:#fff;padding:9px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header h1{font-size:16px;margin:0;font-weight:700}
+header .who{font-size:11px;opacity:.85}
+header .kpi{display:flex;gap:14px;margin-left:auto;flex-wrap:wrap}
+header .kpi div{font-size:11px;opacity:.95;text-align:right}
+header .kpi b{font-size:16px;display:block;font-variant-numeric:tabular-nums}
+nav{display:flex;gap:2px;background:#fff;border-bottom:1px solid var(--line);padding:0 8px;overflow-x:auto;position:sticky;top:0;z-index:40}
+nav button{background:none;border:none;padding:11px 14px;font-size:14px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;font-family:inherit}
+nav button.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+main{padding:12px}
+.tab{display:none}.tab.active{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:13px;margin-bottom:12px}
+.card h2{margin:0 0 10px;font-size:15px}
+.toolbar{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px}
+button.btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-size:13px;font-family:inherit}
+button.btn:hover{filter:brightness(1.1)}
+button.btn:disabled{opacity:.4;cursor:default}
+button.btn.sec{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+button.btn.ghost{background:#eceae6;color:var(--ink)}
+button.btn.danger{background:var(--danger)}
+button.btn.on{background:var(--ok);box-shadow:0 0 0 3px rgba(63,125,78,.25)}
+select,input[type=text],input[type=number],input[type=date],textarea{padding:7px 8px;border:1px solid var(--line);border-radius:5px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink);max-width:100%}
+label.fl{font-size:11px;color:var(--muted);display:block;margin-bottom:3px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border:1px solid var(--line);padding:5px 7px;text-align:left}
+th{background:#f1eee9;font-weight:600}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.scroll{overflow:auto;max-height:58vh;border:1px solid var(--line);border-radius:6px}
+.muted{color:var(--muted);font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.row>div{flex:1;min-width:120px}
+.warnbox{background:#fdf3e6;border:1px solid #e8c99b;color:#8a5a10;padding:8px 10px;border-radius:6px;font-size:12px;margin-bottom:10px}
+.okbox{background:#eaf4ec;border:1px solid #b8d8c0;color:#2f6b3e;padding:8px 10px;border-radius:6px;font-size:12px;margin-bottom:10px}
+.errbox{background:#fdecea;border:1px solid #e8b4ac;color:#8a2a1e;padding:8px 10px;border-radius:6px;font-size:12px;margin-bottom:10px}
+.whbox{margin-bottom:14px}
+.whead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#4a453d;border-radius:8px 8px 0 0;padding:7px 12px;margin-bottom:0}
+.whead h3{margin:0;font-size:15px;padding:0;border-radius:0;color:#fff;background:none !important}
+.whead .muted{color:#cfc8bc}
+.whead .capbar{background:#6b6558}
+.whead .capbar i{background:linear-gradient(90deg,#8fd8ae,#f6c76a)}
+.mapwrap{overflow:auto;padding:2px;border:1px solid var(--line);border-radius:8px;background:#faf9f7}
+.maptable{border-collapse:separate;border-spacing:3px;width:auto;margin:4px}
+.maptable th{background:none;border:none;color:var(--muted);font-size:11px;text-align:center;padding:1px}
+.maptable td{border:none;padding:0}
+.bay{width:98px;background:#e9e6e0;border:1px solid var(--line);border-radius:6px;padding:3px;display:flex;flex-direction:column;gap:3px}
+.slot{height:30px;border-radius:4px;border:1px dashed #cbc5bb;background:#fdfcfa;display:flex;align-items:center;gap:3px;padding:0 4px;font-size:11px;cursor:pointer;color:#b6afa5;user-select:none}
+.slot.filled{border:1px solid #ab967d;background:#fff;color:var(--ink)}
+.slot.sel{outline:3px solid var(--accent);z-index:2}
+.slot.drop{outline:3px solid var(--ok);background:#e7f4ea}
+.slot .tno{font-size:9px;color:#b0a89e;flex:none;width:8px}
+.slot .pid{font-weight:700;font-size:10px;letter-spacing:-.02em}
+.slot .qty{font-size:10px;color:var(--muted);margin-left:auto}
+body.dragmode .slot.filled{cursor:pointer}
+body.dragmode .slot{cursor:pointer}
+.slot.targetable{background-color:rgba(63,125,78,.10) !important;border:1px dashed #7fae8c !important}
+.slot.targetable:active{background-color:rgba(63,125,78,.28) !important}
+.slot.moving{outline:3px solid var(--accent2) !important;outline-offset:-3px;box-shadow:0 3px 10px rgba(0,0,0,.2);z-index:5}
+#fabMove{position:fixed;right:16px;bottom:18px;z-index:410;display:none;flex-direction:column;align-items:center;justify-content:center;
+  width:66px;height:66px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:22px;line-height:1;
+  box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer;font-family:inherit;gap:2px}
+#fabMove span{font-size:11px;font-weight:700}
+#fabMove.on{background:var(--ok)}
+#fabMove.show{display:flex}
+body.movebar-open #fabMove{bottom:118px}
+#askModal .modal{padding:20px}
+#movebar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(140px);background:#8a5a2b;color:#fff;
+  padding:10px 12px 10px 16px;border-radius:12px;font-size:13px;transition:transform .25s;z-index:430;display:block;max-width:94vw;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#movebar .mvrow{display:flex;align-items:center;gap:12px}
+#movebar .mvlast{display:flex;align-items:center;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.25);font-size:12px;opacity:.95}
+#movebar .mvlast span{flex:1}
+#peek{position:fixed;left:12px;right:104px;bottom:12px;max-width:470px;background:#fff;border:2px solid var(--accent);border-radius:10px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);padding:10px 12px;z-index:405;transform:translateY(130%);transition:transform .18s}
+#peek.show{transform:none}
+#peek .pk-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+#peek .pk-grade{border-radius:6px;padding:2px 12px;font-size:18px;font-weight:700;color:#2b2721}
+#peek .pk-loc{font-size:15px;font-weight:700;color:#2b2721}
+#peek .pk-meta{margin-left:auto;font-size:11px;color:#8a8177}
+#peek table{width:100%;border-collapse:collapse;font-size:14px}
+#peek th{font-size:11px;color:#6f675d;font-weight:400;text-align:left;border:none;background:none;padding:1px 0}
+#peek td{border:none;border-top:1px solid #eee;padding:4px 0}
+#peek tr.pk-total td{background:#faf6ef;border-top:1px solid #ddd;font-weight:700}
+#peek .pk-btns{display:flex;gap:8px;margin-top:8px}
+#peek .pk-btns .btn{padding:7px 14px}
+@media(max-width:560px){#peek{right:96px;left:8px}}
+#movebar.show{transform:translateX(-50%)}
+#movebar b{font-size:18px}
+#movebar .btn.sec{background:#fff;color:#8a5a2b;border:none;white-space:nowrap}
+.slot.armed{outline:3px solid var(--accent2);outline-offset:-3px;box-shadow:0 3px 10px rgba(0,0,0,.25);z-index:5}
+#undobar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(90px);background:#2c2924;color:#fff;
+  padding:9px 12px 9px 16px;border-radius:22px;font-size:13px;transition:transform .25s;z-index:420;display:flex;align-items:center;gap:12px;max-width:92vw}
+#undobar.show{transform:translateX(-50%)}
+#undobar .btn.sec{background:#fff;color:#2c2924;border:none}
+#ghost{position:fixed;pointer-events:none;z-index:300;background:#fff;border:2px solid var(--accent);border-radius:5px;padding:3px 8px;font-size:12px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.25);display:none}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted);align-items:center;margin-top:8px}
+.legend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:3px;vertical-align:-1px}
+.capbar{height:8px;background:#e4e0d9;border-radius:4px;overflow:hidden;width:130px}
+.capbar i{display:block;height:100%;background:var(--ok)}
+#drawer{position:fixed;top:0;right:0;width:min(600px,100%);height:100%;background:#fff;box-shadow:-4px 0 22px rgba(0,0,0,.15);transform:translateX(105%);transition:transform .2s;z-index:120;display:flex;flex-direction:column}
+#drawer.open{transform:none}
+.dh{padding:11px 13px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.dh h3{margin:0;font-size:16px;flex:1}
+.db{padding:13px;overflow:auto;flex:1}
+.df{padding:10px 13px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+.close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1}
+.stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.stat div{background:#f5f3f0;border-radius:6px;padding:7px 11px;min-width:88px}
+.stat span{font-size:10px;color:var(--muted);display:block}
+.stat b{font-size:17px;font-variant-numeric:tabular-nums}
+.modalbg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:160;padding:12px}
+.modalbg.open{display:flex}
+.modal{background:#fff;border-radius:10px;padding:16px;width:min(620px,100%);max-height:88vh;overflow:auto}
+.modal h3{margin:0 0 12px;font-size:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;color:#2b2b2b}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(90px);background:#2c2924;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;transition:transform .25s;z-index:400;max-width:90vw;text-align:center}
+#toast.show{transform:translateX(-50%)}
+#busy{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent));transform:scaleX(0);transform-origin:left;transition:transform .3s;z-index:500}
+#busy.on{transform:scaleX(.8)}
+#boot{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:600;font-size:14px;color:var(--muted)}
+.spin{width:28px;height:28px;border:3px solid #ddd;border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#syncbar{display:none;background:#eaf4ec;border-bottom:1px solid #b8d8c0;color:#2f6b3e;padding:6px 14px;font-size:12px;align-items:center;gap:10px}
+#syncbar.on{display:flex}
+@media(max-width:640px){.bay{width:84px}.grid2,.grid3{grid-template-columns:1fr}header .kpi{width:100%;margin-left:0;justify-content:space-between}}
+</style>
+</head>
+<body>
+
+<div id="busy"></div>
+<div id="boot"><div class="spin"></div><div>スプレッドシートから読み込んでいます…</div></div>
+
+<header>
+  <div>
+    <h1>さつまいも貯蔵庫 在庫管理</h1>
+    <div class="who" id="whoami"></div>
+  </div>
+  <div class="kpi">
+    <div>在庫パレット<b id="kPal">0</b></div>
+    <div>カゴ数<b id="kCon">0</b></div>
+    <div>推定重量kg<b id="kKg">0</b></div>
+    <div>庫使用率<b id="kRate">0%</b></div>
+    <div>今季出荷kg<b id="kShip">0</b></div>
+    <div id="kWashWrap" style="display:none">洗浄中カゴ<b id="kWash">0</b></div>
+  </div>
+</header>
+
+<div id="syncbar"><span>他の人がデータを更新しました。</span><button class="btn sec" id="btnSync" style="padding:3px 10px">最新に更新</button></div>
+
+<nav>
+  <button class="active" data-tab="map">庫内マップ</button>
+  <button data-tab="in">入庫</button>
+  <button data-tab="out">出荷記録</button>
+  <button data-tab="stock">在庫一覧</button>
+  <button data-tab="agg">集計</button>
+  <button data-tab="eff">レイアウト分析</button>
+  <button data-tab="log">履歴</button>
+  <button data-tab="conf">設定</button>
+</nav>
+
+<main>
+
+<section class="tab active" id="tab-map">
+  <div class="card">
+    <div class="toolbar">
+      <button class="btn" id="btnDrag">パレットを移動する</button>
+      <div style="flex:0 0 auto"><label class="fl">色分け</label>
+        <select id="mColor"><option value="grade">等級</option><option value="variety">品種</option><option value="fill">充填率</option><option value="area">エリア</option><option value="age">貯蔵日数</option></select></div>
+      <div style="flex:0 0 auto"><label class="fl">強調表示</label><select id="mHi"><option value="">なし</option></select></div>
+      <div style="flex:0 0 auto"><label class="fl">表示</label><select id="mShow"><option value="">両方</option><option value="1">貯蔵庫1のみ</option><option value="2">貯蔵庫2のみ</option></select></div>
+      <div style="flex:1"></div>
+      <button class="btn sec" id="btnReload">↻ 最新に更新</button>
+      <button class="btn sec" id="btnGoIn">＋ 入庫する</button>
+    </div>
+    <div class="warnbox" id="dragTip" style="display:none">① 動かすパレットをタップ　→　② 置きたいマスをタップ。これを繰り返して何枚でも続けて動かせます。終わったら「やめる」を押してください。直前の1回は下のバーから取り消せます。</div>
+    <div id="maps"></div>
+    <div id="washTray" style="display:none"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+</section>
+
+<section class="tab" id="tab-in">
+  <div class="card">
+    <h2>パレット入庫</h2>
+    <div class="grid3">
+      <div><label class="fl">等級（任意・未選別なら空欄）</label><select id="iGrade"></select></div>
+      <div><label class="fl">状態</label><select id="iWash"><option value="">土付き（ふだん）</option><option value="済">洗浄済 💧</option></select></div>
+      <div><label class="fl">貯蔵庫</label><select id="iWh"></select></div>
+    </div>
+    <h3 style="font-size:14px;margin:14px 0 6px">中身（圃場が混在する場合は行を追加）</h3>
+    <div class="row">
+      <div style="max-width:140px"><label class="fl">収穫日</label><input type="date" id="iHarvest"></div>
+      <div style="max-width:130px"><label class="fl">エリア</label><select id="iArea"></select></div>
+      <div style="min-width:170px"><label class="fl">圃場</label><select id="iField"></select></div>
+      <div style="max-width:140px"><label class="fl">品種</label><select id="iVar"></select></div>
+      <div style="max-width:100px"><label class="fl">カゴ数</label><input type="number" id="iCount" step="0.25" min="0" value="24" inputmode="decimal"></div>
+      <div style="flex:0 0 auto"><button class="btn sec" id="iAdd">＋行追加</button></div>
+    </div>
+    <table id="iLines" style="margin-top:10px"></table>
+    <div class="row" style="margin-top:12px">
+      <div style="max-width:150px"><label class="fl">置き場所</label><select id="iPlace"><option value="auto">おすすめ位置に自動</option><option value="manual">位置を指定</option><option value="none">未配置（庫外で保留）</option></select></div>
+      <div style="max-width:90px" id="wRow"><label class="fl">行</label><select id="iRow"></select></div>
+      <div style="max-width:90px" id="wCol"><label class="fl">列</label><select id="iCol"></select></div>
+      <div style="max-width:90px" id="wTier"><label class="fl">段</label><select id="iTier"></select></div>
+      <div><label class="fl">メモ</label><input type="text" id="iNote"></div>
+    </div>
+    <div class="okbox" id="iSuggest" style="margin-top:10px"></div>
+    <div class="row" style="margin-top:6px">
+      <div style="flex:0 0 auto"><button class="btn" id="iSave">この内容で入庫する</button></div>
+      <div style="flex:0 0 auto"><button class="btn ghost" id="iSaveNext">入庫して続けて入力</button></div>
+      <div style="flex:0 0 auto"><button class="btn ghost" id="iClear">クリア</button></div>
+      <div class="muted" style="align-self:center">次のパレット番号：<b id="iNextId">—</b></div>
+    </div>
+  </div>
+  <div class="card"><h2>直近の入庫</h2><div class="scroll" style="max-height:34vh"><table id="iRecent"></table></div></div>
+</section>
+
+<section class="tab" id="tab-out">
+  <div class="card">
+    <div class="toolbar">
+      <div style="max-width:150px"><label class="fl">開始日</label><input type="date" id="oFrom"></div>
+      <div style="max-width:150px"><label class="fl">終了日</label><input type="date" id="oTo"></div>
+      <div style="max-width:150px"><label class="fl">区分</label><select id="oKind"><option value="">すべて</option><option>出荷</option><option>洗浄</option><option>廃棄・ロス</option><option>その他</option></select></div>
+      <div><label class="fl">出荷先で検索</label><input type="text" id="oQ"></div>
+      <div style="flex:0 0 auto"><button class="btn sec" id="oCsv">出荷CSV出力</button></div>
+    </div>
+    <div class="stat" id="oStat"></div>
+    <div class="scroll"><table id="oTbl"></table></div>
+  </div>
+</section>
+
+<section class="tab" id="tab-stock">
+  <div class="card">
+    <div class="toolbar">
+      <div style="max-width:130px"><label class="fl">貯蔵庫</label><select id="sWh"><option value="">すべて</option></select></div>
+      <div style="max-width:120px"><label class="fl">等級</label><select id="sGrade"><option value="">すべて</option></select></div>
+      <div style="max-width:130px"><label class="fl">洗浄</label><select id="sWash"><option value="">すべて</option><option value="w">洗浄済 💧</option><option value="d">土付き</option></select></div>
+      <div style="max-width:150px"><label class="fl">品種</label><select id="sVar"><option value="">すべて</option></select></div>
+      <div style="max-width:130px"><label class="fl">エリア</label><select id="sArea"><option value="">すべて</option></select></div>
+      <div><label class="fl">検索（番号/圃場/メモ）</label><input type="text" id="sQ"></div>
+      <div style="max-width:150px"><label class="fl">並び順</label><select id="sSort"><option value="loc">場所順</option><option value="old">収穫が古い順</option><option value="new">入庫が新しい順</option></select></div>
+      <div style="flex:0 0 auto"><button class="btn sec" id="sCsv">在庫CSV出力</button></div>
+    </div>
+    <div class="scroll"><table id="sTbl"></table></div>
+  </div>
+</section>
+
+<section class="tab" id="tab-agg">
+  <div class="card">
+    <h2>現在庫</h2>
+    <div class="toolbar"><button class="btn sec" id="aCsv">集計CSV出力</button></div>
+    <div class="row" style="margin:6px 0 2px">
+      <div style="max-width:190px;flex:0 0 auto"><label class="fl">洗浄状態</label><select id="aWash"><option value="">すべて</option><option value="w">洗浄済 💧 のみ</option><option value="d">土付きのみ</option></select></div>
+      <div class="muted" id="aWashSum" style="flex:1 1 auto;font-size:12px;padding-top:24px"></div>
+    </div>
+    <h3 style="font-size:13px;margin:10px 0 4px">等級 × エリア（カゴ数 / kg）</h3><table id="aGA"></table>
+    <h3 style="font-size:13px;margin:16px 0 4px">品種 × 貯蔵庫</h3><table id="aVW"></table>
+    <h3 style="font-size:13px;margin:16px 0 4px">圃場別</h3><div class="scroll"><table id="aF"></table></div>
+  </div>
+  <div class="card">
+    <h2>出荷実績</h2>
+    <h3 style="font-size:13px;margin:10px 0 4px">出荷先別</h3><table id="aDest"></table>
+    <h3 style="font-size:13px;margin:16px 0 4px">月別</h3><table id="aMon"></table>
+    <h3 style="font-size:13px;margin:16px 0 4px">圃場別 出荷・ロス</h3><div class="scroll"><table id="aFS"></table></div>
+  </div>
+</section>
+
+<section class="tab" id="tab-eff">
+  <div class="card"><h2>収容能力</h2><div id="eCap"></div></div>
+  <div class="card"><h2>取り出しやすさ</h2>
+    <p class="muted" style="margin:0 0 8px">入口側：<span id="eDoorTxt"></span>（設定タブで変更）。上に何も載っていないパレットは積み替えなしで出せます。</p>
+    <div id="eAccess"></div></div>
+  <div class="card"><h2>先入先出（古い順に出せているか）</h2>
+    <p class="muted" style="margin:0 0 8px">取り出しコスト＝上に載っている枚数×3＋入口からの列数。上位に高コストが並ぶなら並べ替えの余地があります。</p>
+    <div class="scroll" style="max-height:44vh"><table id="eFifo"></table></div></div>
+  <div class="card"><h2>ロットのまとまり具合</h2>
+    <p class="muted" style="margin:0 0 8px">同じ品種・収穫日のパレットが何か所に散らばっているか。</p>
+    <div class="scroll" style="max-height:40vh"><table id="eLot"></table></div></div>
+</section>
+
+<section class="tab" id="tab-log">
+  <div class="card">
+    <div class="toolbar">
+      <div style="max-width:150px"><label class="fl">種別</label><select id="lType"><option value="">すべて</option></select></div>
+      <div style="max-width:150px"><label class="fl">開始日</label><input type="date" id="lFrom"></div>
+      <div style="max-width:150px"><label class="fl">終了日</label><input type="date" id="lTo"></div>
+      <div><label class="fl">検索</label><input type="text" id="lQ"></div>
+      <div style="flex:0 0 auto"><button class="btn sec" id="lCsv">履歴CSV出力</button></div>
+    </div>
+    <div class="scroll"><table id="lTbl"></table></div>
+  </div>
+</section>
+
+<section class="tab" id="tab-conf">
+  <div class="card">
+    <h2>貯蔵庫</h2>
+    <div id="cWh"></div>
+    <div class="row" style="margin-top:10px">
+      <div style="max-width:150px"><label class="fl">1パレット最大カゴ数</label><input type="number" id="cMax" min="1"></div>
+      <div style="max-width:150px"><label class="fl">カゴ1個の重量kg</label><input type="number" id="cUW" step="0.1"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div><label class="fl">品種（カンマ区切り）</label><input type="text" id="cVar" style="width:100%"></div>
+      <div><label class="fl">出荷先（カンマ区切り）</label><input type="text" id="cDest" style="width:100%"></div>
+      <div><label class="fl">廃棄・ロス理由（カンマ区切り）</label><input type="text" id="cLoss" style="width:100%"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn" id="cSave">設定を保存</button></div>
+    <p class="muted" style="margin-top:8px">設定はスプレッドシートの「設定」シートに保存されます。全員に反映されます。</p>
+  </div>
+  <div class="card">
+    <h2>圃場マスタ</h2>
+    <div class="okbox" id="fSrc"></div>
+    <div class="toolbar">
+      <button class="btn sec" id="fReload">↻ 圃場マスタを再読込</button>
+      <button class="btn sec" id="fOut">圃場CSV出力</button>
+      <div style="max-width:150px"><label class="fl">表示</label><select id="fFilter"><option value="1">有効のみ</option><option value="">すべて</option></select></div>
+      <span class="muted" id="fCount" style="align-self:center"></span>
+    </div>
+    <p class="muted">参照先は「設定」シートの<b>圃場マスタURL</b>で指定します。正データは既存のマスターアプリ側です。ここからは編集できません。<br>
+    マップに短く出したい場合は、圃場マスタに <b>「略称」</b>（または「表示名」）という列を作って書いてください。空欄なら圃場名がそのまま出ます。</p>
+    <div class="scroll" style="max-height:40vh"><table id="fTbl"></table></div>
+  </div>
+</section>
+
+</main>
+
+<div id="drawer">
+  <div class="dh"><h3 id="dTitle">パレット</h3><button class="close" id="dClose">×</button></div>
+  <div class="db">
+    <div class="stat">
+      <div><span>場所</span><b id="dLoc" style="font-size:15px">—</b></div>
+      <div><span>カゴ数</span><b id="dCnt">0</b></div>
+      <div><span>推定kg</span><b id="dKg">0</b></div>
+      <div><span>貯蔵日数</span><b id="dAge">—</b></div>
+    </div>
+    <div class="muted" id="dMeta" style="margin-bottom:10px"></div>
+    <div class="row">
+      <div style="max-width:130px"><label class="fl">等級</label><select id="dGrade"></select></div>
+      <div style="max-width:140px"><label class="fl">入庫日</label><input type="date" id="dIn"></div>
+      <div><label class="fl">メモ</label><input type="text" id="dNote"></div>
+    </div>
+    <h4 style="margin:14px 0 6px;font-size:14px">中身</h4>
+    <table id="dLines"></table>
+    <div class="row" style="margin-top:8px">
+      <div style="max-width:135px"><label class="fl">収穫日</label><input type="date" id="dnHarvest"></div>
+      <div style="min-width:160px"><label class="fl">圃場</label><select id="dnField"></select></div>
+      <div style="max-width:130px"><label class="fl">品種</label><select id="dnVar"></select></div>
+      <div style="max-width:90px"><label class="fl">カゴ</label><input type="number" id="dnCount" step="0.25" min="0" value="6" inputmode="decimal"></div>
+      <div style="flex:0 0 auto"><button class="btn sec" id="dnAdd">＋</button></div>
+    </div>
+    <h4 style="margin:16px 0 6px;font-size:14px">このパレットの履歴</h4>
+    <table id="dLog"></table>
+  </div>
+  <div class="df">
+    <button class="btn" id="dSave">保存</button>
+    <button class="btn sec" id="dMove">場所を変える</button>
+    <button class="btn sec" id="dShip">出庫・出荷</button>
+    <button class="btn danger" style="margin-left:auto;padding:10px 18px" id="dDel">削除</button>
+  </div>
+</div>
+
+<div class="modalbg" id="mvModal"><div class="modal">
+  <h3>場所を変える</h3><p class="muted" id="mvFrom"></p>
+  <div class="grid2">
+    <div><label class="fl">貯蔵庫</label><select id="mvWh"></select></div>
+    <div><label class="fl">段</label><select id="mvTier"></select></div>
+    <div><label class="fl">行</label><select id="mvRow"></select></div>
+    <div><label class="fl">列</label><select id="mvCol"></select></div>
+    <div><label class="fl">メモ</label><input type="text" id="mvNote"></div>
+  </div>
+  <div class="warnbox" id="mvInfo" style="display:none;margin-top:10px"></div>
+  <div style="margin-top:14px;display:flex;gap:8px"><button class="btn" id="mvOk">移動する</button><button class="btn ghost" id="mvNo">キャンセル</button></div>
+</div></div>
+
+<style>
+#washTray{margin:10px 0 4px;background:#eaf2f8;border:1px solid #c9dcea;border-radius:10px;padding:10px 12px}
+#washTray .wt-head{font-size:12px;font-weight:700;color:#33607e;margin-bottom:8px}
+#washTray .wt-cards{display:flex;gap:10px;flex-wrap:wrap}
+#washTray .wt-card{background:#fff;border:1px solid #c9dcea;border-radius:8px;padding:8px 10px;min-width:180px}
+#washTray .wt-l1{display:flex;gap:6px;align-items:center}
+#washTray .wt-l2{font-size:11px;color:#6f675d;margin:4px 0}
+#washTray .wt-l3{font-size:13px}
+#washTray .wt-btns{display:flex;gap:6px;margin-top:6px}
+.slot.washed{position:relative}
+.slot.washed::after{content:"💧";position:absolute;right:1px;bottom:0;font-size:9px}
+#peek .pk-wash{background:#d5e8f5;color:#2a5876;font-size:10px;font-weight:700;border-radius:99px;padding:2px 7px}
+</style>
+<div class="modalbg" id="wmModal"><div class="modal">
+  <h3>洗浄から入庫し直す</h3><p class="muted" id="wmInfo"></p>
+  <table id="wmLines"></table>
+  <div class="grid3" style="margin-top:10px">
+    <div><label class="fl">貯蔵庫</label><select id="wmWh"></select></div>
+    <div><label class="fl">&nbsp;</label><div class="muted" id="wmSum" style="padding:8px 0"></div></div>
+  </div>
+  <p class="muted" style="font-size:11px">元の場所が空いていればそこへ、埋まっていれば入口近くの空きマスへ入ります。戻ったパレットには「洗浄済 💧」が付きます。</p>
+  <div style="margin-top:12px;display:flex;gap:8px"><button class="btn" id="wmOk">この内容で入庫する</button><button class="btn ghost" id="wmNo">キャンセル</button></div>
+</div></div>
+<div class="modalbg" id="spModal"><div class="modal">
+  <h3>出庫・出荷</h3><p class="muted" id="spInfo"></p>
+  <div class="grid3">
+    <div><label class="fl">出庫日</label><input type="date" id="spDate"></div>
+    <div><label class="fl">区分</label><select id="spKind"><option>出荷</option><option>洗浄</option><option>廃棄・ロス</option><option>その他</option></select></div>
+    <div><label class="fl">メモ</label><input type="text" id="spNote"></div>
+  </div>
+  <div class="grid2" style="margin-top:8px">
+    <div id="spDestWrap"><label class="fl">出荷先・販売先</label><input type="text" id="spDest" list="dlDest"><datalist id="dlDest"></datalist></div>
+    <div id="spLossWrap"><label class="fl">廃棄・ロス理由</label><input type="text" id="spLoss" list="dlLoss"><datalist id="dlLoss"></datalist></div>
+  </div>
+  <h4 style="margin:14px 0 6px;font-size:14px">出す数量（カゴ）</h4>
+  <table id="spLines"></table>
+  <div class="row" style="margin-top:6px">
+    <div style="flex:0 0 auto"><button class="btn ghost" id="spAll">全量にする</button></div>
+    <div style="flex:0 0 auto"><button class="btn ghost" id="spZero">全部0にする</button></div>
+  </div>
+  <div class="grid3" style="margin-top:12px">
+    <div><label class="fl">単価（円/kg）</label><input type="number" id="spPrice" step="1"></div>
+    <div><label class="fl">金額（円）</label><input type="number" id="spAmt" step="1"></div>
+    <div><label class="fl">&nbsp;</label><div class="muted" id="spSum" style="padding:8px 0"></div></div>
+  </div>
+  <div style="margin-top:14px;display:flex;gap:8px"><button class="btn" id="spOk">出庫を記録する</button><button class="btn ghost" id="spNo">キャンセル</button></div>
+</div></div>
+
+<div class="modalbg" id="dlModal"><div class="modal">
+  <h3>CSVを作成しました</h3>
+  <p class="muted">Googleドライブ（このスプレッドシートと同じ場所）に保存しました。下のリンクから開いてください。</p>
+  <p><a id="dlLink" href="#" target="_blank" rel="noopener" style="font-size:15px;color:var(--accent);font-weight:700"></a></p>
+  <div style="margin-top:12px"><button class="btn ghost" id="dlNo">閉じる</button></div>
+</div></div>
+
+<div class="modalbg" id="askModal"><div class="modal" style="width:min(400px,100%)">
+  <h3 id="askTitle">確認</h3>
+  <p id="askMsg" style="font-size:14px;line-height:1.7;margin:0 0 4px;white-space:pre-line"></p>
+  <div style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end">
+    <button class="btn ghost" id="askNo" style="padding:11px 20px">キャンセル</button>
+    <button class="btn" id="askYes" style="padding:11px 20px">OK</button>
+  </div>
+</div></div>
+
+<button id="fabMove" title="パレットを移動する">⇄<span>移動</span></button>
+
+<div id="peek"></div>
+<div id="ghost"></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   さつまいも貯蔵庫 在庫管理 — クライアント（GAS HtmlService）
+   データはすべて Google スプレッドシート側。ここは表示と操作のみ。
+   ===================================================================== */
+
+var GRADES=["30以下","小","中","大","傷","病気","奇形","浮き","規格外"];
+var GRADE_SHORT={"30以下":"30","規格外":"外"};
+var GRADE_COLOR={"30以下":"#cdb9ea","小":"#8ec4e6","中":"#8fd8ae","大":"#f6c76a","傷":"#e8a672","病気":"#d97b70","奇形":"#7fc7bd","浮き":"#e2a9c6","規格外":"#a9b4c0","":"#c9c3ba"};
+function tint(hex,a){
+  var h=String(hex).replace("#","");
+  if(h.length!==6) return "transparent";
+  return "rgba("+parseInt(h.slice(0,2),16)+","+parseInt(h.slice(2,4),16)+","+parseInt(h.slice(4,6),16)+","+a+")";
+}
+var AREA_ORDER=["八尾","河南町","羽曳野","富田林","しまやん","買取","その他"];
+var AREA_COLOR={"八尾":"#7fb3d5","河南町":"#7dcea0","羽曳野":"#f7c873","富田林":"#bb8fce","しまやん":"#e59866","買取":"#d98cb3","その他":"#b3aca3"};
+var VAR_COLOR={};
+var ROWL="ABCDEFGHIJKL".split("");
+var S=null, UI={sel:null,dragMode:false,drag:null,moveFrom:null,lastMove:null,moveCount:0,busy:0,stamp:null};
+var intakeLines=[];
+
+/* ---------- 通信 ---------- */
+function busy(on){
+  UI.busy += on?1:-1; if(UI.busy<0) UI.busy=0;
+  document.getElementById("busy").classList.toggle("on", UI.busy>0);
+}
+var API_URL="https://script.google.com/macros/s/AKfycbyM7vrki0v9-u34RkJON6YuObGpd_Yx1gzTcuGFzxJQVTne4_XUkD3yh0vGFX4zFp9f/exec";
+var API_KEY="";
+try{ API_KEY=localStorage.getItem("CHZ_KEY")||""; }catch(e){}
+function call(fn){
+  var args=Array.prototype.slice.call(arguments,1);
+  busy(true);
+  var done=false; function fin(){ if(!done){ done=true; busy(false); } }
+  return fetch(API_URL,{method:"POST",body:JSON.stringify({key:API_KEY,fn:fn,args:args})})
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      fin();
+      if(j && j.ok) return j.result;
+      var msg=(j && j.error) || "通信エラー";
+      if(String(msg).indexOf("合言葉")>=0) showLogin();
+      throw new Error(msg);
+    })
+    .catch(function(e){ fin(); throw e; });
+}
+function saveSnap_(){
+  try{
+    var s={config:S.config,fields:S.fields,fieldSource:S.fieldSource,pallets:S.pallets,
+           shipments:S.shipments,log:(S.log||[]).slice(-150),stamp:S.stamp,me:S.me,viewPrefs:S.viewPrefs};
+    localStorage.setItem("SNAP_V1",JSON.stringify(s));
+  }catch(e){}
+}
+function stampLog_(s){ var p=String(s||"").split("/"); return Number(p[1]||0); }
+function applyState(st,force){
+  /* 古い応答（自分の操作より前の状態）が後から届いても画面を巻き戻さない */
+  if(!force && S && UI.stamp && st && st.stamp && stampLog_(st.stamp) < stampLog_(UI.stamp)){ return; }
+  if(S){
+    if(!st.fields) { st.fields=S.fields; st.fieldSource=S.fieldSource; }
+    if(!st.config) st.config=S.config;
+  }
+  S=st; UI.stamp=st.stamp;
+  document.getElementById("syncbar").classList.remove("on");
+  renderAll();
+  saveSnap_();
+}
+/* 保存は1件ずつ順番に送る（同時送信による追い越し・競合を防ぐ） */
+var _mq=Promise.resolve();
+function enqueue(fn){
+  var r=_mq.then(fn,fn);
+  _mq=r.catch(function(){});
+  return r;
+}
+function mutate(fn){
+  var args=Array.prototype.slice.call(arguments,1);
+  return enqueue(function(){ return call.apply(null,[fn].concat(args)); }).then(function(st){
+    if(st && st.light){ if(st.stamp) UI.stamp=st.stamp; renderKPI(); return st; }
+    applyState(st); return st;
+  }).catch(function(e){ toast("エラー: "+(e&&e.message?e.message:e)); return reload(); });
+}
+function reload(){ return call("getStateFresh").then(function(st){ applyState(st,true); }).catch(function(e){ toast("読込エラー: "+(e&&e.message?e.message:e)); }); }
+
+/* ---------- ユーティリティ ---------- */
+function $(s){return document.querySelector(s);}
+function $$(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
+function ask(msg,title,okLabel){
+  return new Promise(function(res){
+    var m=$("#askModal");
+    $("#askTitle").textContent=title||"確認";
+    $("#askMsg").textContent=msg;
+    $("#askYes").textContent=okLabel||"OK";
+    m.classList.add("open");
+    var done=function(v){ m.classList.remove("open"); $("#askYes").onclick=null; $("#askNo").onclick=null; res(v); };
+    $("#askYes").onclick=function(){ done(true); };
+    $("#askNo").onclick=function(){ done(false); };
+  });
+}
+function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show");},3000);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
+function r1(n){return Math.round(n*10)/10;}
+function r2(n){return Math.round(n*100)/100;}
+function daysBetween(a,b){if(!a||!b)return null;return Math.round((new Date(b)-new Date(a))/86400000);}
+function wh(id){for(var i=0;i<S.config.warehouses.length;i++) if(S.config.warehouses[i].id===Number(id)) return S.config.warehouses[i]; return null;}
+function rowL(r){return ROWL[r-1]||("R"+r);}
+function locStr(p){if(!p||!p.loc)return "庫外";var w=wh(p.wh)||{name:"?"};return w.name+" "+rowL(p.loc.r)+"-"+("0"+p.loc.c).slice(-2)+"-"+p.loc.t+"段";}
+function locStr2(id,r,c,t){var w=wh(id)||{name:"?"};return w.name+" "+rowL(r)+"-"+("0"+c).slice(-2)+"-"+t+"段";}
+function fld(id){for(var i=0;i<S.fields.length;i++) if(S.fields[i].id===id) return S.fields[i]; return null;}
+function fldName(id){var f=fld(id);return f?f.id+" "+f.name:(id||"—");}
+function inStock(){return S.pallets.filter(function(p){return p.status==="在庫";});}
+function washing(){return S.pallets.filter(function(p){return p.status==="洗浄中";});}
+function palletAt(w,r,c,t){var a=S.pallets;for(var i=0;i<a.length;i++){var p=a[i];if(p.status==="在庫"&&p.wh===Number(w)&&p.loc&&p.loc.r===r&&p.loc.c===c&&p.loc.t===t)return p;}return null;}
+function pById(id){for(var i=0;i<S.pallets.length;i++) if(S.pallets[i].id===id) return S.pallets[i]; return null;}
+function pCount(p){return r2(p.lines.reduce(function(a,l){return a+(Number(l.count)||0);},0));}
+function pKg(p){return pCount(p)*S.config.unitWeightKg;}
+function pVarieties(p){var s={},o=[];p.lines.forEach(function(l){if(l.variety&&!s[l.variety]){s[l.variety]=1;o.push(l.variety);}});return o;}
+function pOldestHarvest(p){var d=p.lines.map(function(l){return l.harvestAt;}).filter(Boolean).sort();return d[0]||null;}
+function uniq(a){var s={},o=[];a.forEach(function(x){if(x&&!s[x]){s[x]=1;o.push(x);}});return o;}
+var MAP_DISP = "field";
+var MAP_SIZE = "m";
+var MAP_ONELINE = false;
+var _fitting = false;
+function fitMap(){
+  if(MAP_SIZE!=="fit"){ document.documentElement.style.removeProperty("--bay-w");
+    document.documentElement.style.removeProperty("--slot-h");
+    document.documentElement.style.removeProperty("--slot-fs");
+    if(MAP_ONELINE){ MAP_ONELINE=false; if(!_fitting){ _fitting=true; renderMaps(); _fitting=false; } }
+    return; }
+  var wrap=document.querySelector("#maps .mapwrap");
+  var box=document.querySelector("#maps .whbox");
+  if(!wrap||!box||!S) return;
+  var only=$("#mShow").value;
+  var w=S.config.warehouses.filter(function(x){ return !only||String(x.id)===only; })[0]||S.config.warehouses[0];
+  var across = MAP_VERT ? w.rows : w.cols;
+  var down   = MAP_VERT ? w.cols : w.rows;
+  var availW = wrap.clientWidth - 46;
+  var rect = wrap.getBoundingClientRect();
+  var availH = window.innerHeight - rect.top - 96;
+  var bay  = Math.floor(availW/across) - 3;
+  var slot = Math.floor(availH/(down*3)) - 1;
+  bay  = Math.max(52, Math.min(200, bay));
+  slot = Math.max(16, Math.min(64, slot));
+  var fs = slot>=42 ? 13 : slot>=34 ? 12 : slot>=26 ? 11 : 10;
+  document.documentElement.style.setProperty("--bay-w", bay+"px");
+  document.documentElement.style.setProperty("--slot-h", slot+"px");
+  document.documentElement.style.setProperty("--slot-fs", fs+"px");
+  var one = slot < 26;
+  if(one!==MAP_ONELINE){
+    MAP_ONELINE=one;
+    if(!_fitting){ _fitting=true; renderMaps(); _fitting=false; }
+  }
+}
+function md(d){ if(!d) return ""; var a=String(d).split("-"); return a.length>=3 ? (Number(a[1])+"/"+Number(a[2])) : String(d); }
+function fShort(id){
+  var f=fld(id); if(!f) return id||"";
+  if(f.short) return f.short;
+  return f.name||f.id;
+}
+function pFieldLabel(p){
+  var ids=uniq(p.lines.map(function(l){return l.fieldId;}));
+  if(!ids.length) return "—";
+  return fShort(ids[0]) + (ids.length>1 ? " +"+(ids.length-1) : "");
+}
+function pDateLabel(p){
+  var ds=uniq(p.lines.map(function(l){return l.harvestAt;}).filter(Boolean)).sort();
+  if(!ds.length) return "";
+  if(ds.length===1) return md(ds[0]);
+  var a=ds[0].split("-"), b=ds[ds.length-1].split("-");
+  return md(ds[0])+"〜"+(a[1]===b[1] ? Number(b[2]) : md(ds[ds.length-1]));
+}
+function pVarLabel(p){ var v=pVarieties(p); return v.length? v.join("・") : ""; }
+function varShort(v){
+  if(!v) return "";
+  return v.split("・").map(function(x){
+    if(x.indexOf("シルク")>=0) return "シルク";
+    if(x.indexOf("はるか")>=0) return "はるか";
+    return x.length>4 ? x.slice(0,4) : x;
+  }).join("・");
+}
+function gradeBadge(g){
+  var c=GRADE_COLOR[g||""]||"#c9c3ba";
+  var t=GRADE_SHORT[g]||g||"未";
+  return '<span class="gb" style="background:'+c+'">'+esc(t)+'</span>';
+}
+function ageDays(p){ var d=daysBetween(pOldestHarvest(p),today()); return d==null?"":d+"日"; }
+function slotBody(p,t){
+  var q=pCount(p);
+  if(MAP_DISP==="id"){
+    return '<span class="tno">'+t+'</span><span class="sname">'+esc(p.id)+'</span><span class="sqty">'+q+'</span>';
+  }
+  if(MAP_ONELINE){
+    if(MAP_DISP==="date") return '<span class="tno">'+t+'</span><span class="sname">'+esc(pDateLabel(p))+'</span><span class="sqty">'+q+'</span>';
+    if(MAP_DISP==="variety") return '<span class="tno">'+t+'</span><span class="sname">'+esc(pVarLabel(p)||"—")+'</span><span class="sqty">'+q+'</span>';
+    return '<span class="tno">'+t+'</span>'+gradeBadge(p.grade)+'<span class="sname">'+esc(pFieldLabel(p))+'</span><span class="sqty">'+q+'</span>';
+  }
+  var l1,l2;
+  if(MAP_DISP==="date"){
+    l1='<span class="tno">'+t+'</span><span class="sname">'+esc(pDateLabel(p))+'</span><span class="gb2">'+esc(ageDays(p))+'</span><span class="sqty">'+q+'</span>';
+    l2=esc((p.grade||"未選別")+" "+pFieldLabel(p));
+  }else if(MAP_DISP==="variety"){
+    l1='<span class="tno">'+t+'</span><span class="sname">'+esc(pVarLabel(p)||"—")+'</span><span class="sqty">'+q+'</span>';
+    l2=esc((p.grade||"未選別")+" "+pFieldLabel(p)+" "+pDateLabel(p));
+  }else{
+    l1='<span class="tno">'+t+'</span>'+gradeBadge(p.grade)+'<span class="sname">'+esc(pFieldLabel(p))+'</span>';
+    l2='<span>'+esc(pDateLabel(p)+" "+varShort(pVarLabel(p)))+'</span><span class="sqty2">'+q+'</span>';
+  }
+  return '<span class="sl1">'+l1+'</span><span class="sl2">'+l2+'</span>';
+}
+function varColor(v){
+  if(!v) return "#c9c3ba";
+  if(!VAR_COLOR[v]){var pal=["#c98a3f","#6a9fd8","#79b87d","#b98ec9","#d9776f","#6fbdb5","#c7b23f"];VAR_COLOR[v]=pal[Object.keys(VAR_COLOR).length%pal.length];}
+  return VAR_COLOR[v];
+}
+
+/* ---------- マップ ---------- */
+function slotColor(p,mode){
+  if(mode==="grade") return GRADE_COLOR[p.grade||""]||"#c9c3ba";
+  if(mode==="variety") return varColor(pVarieties(p)[0]||"");
+  if(mode==="area"){var f=fld((p.lines[0]||{}).fieldId);return AREA_COLOR[(f||{}).area]||"#b3aca3";}
+  if(mode==="fill"){var r=pCount(p)/S.config.maxPerPallet;return r>=1?"#3f7d4e":r>=.5?"#c98a3f":"#c06a1f";}
+  if(mode==="age"){var d=daysBetween(pOldestHarvest(p),today());if(d==null)return "#c9c3ba";return d>150?"#b03a2e":d>90?"#d98040":d>45?"#e0b64f":"#7dbf8a";}
+  return "#c9c3ba";
+}
+function renderMaps(){
+  var mode=$("#mColor").value, hi=$("#mHi").value, only=$("#mShow").value, h="";
+  S.config.warehouses.forEach(function(w){
+    if(only && String(w.id)!==only) return;
+    var cap=w.rows*w.cols*w.tiers;
+    var used=inStock().filter(function(p){return p.wh===w.id&&p.loc;}).length;
+    h+='<div class="whbox"><div class="whead"><h3 style="background:'+(w.id===1?"var(--w1)":"var(--w2)")+'">'+esc(w.name)+'</h3>'
+      +'<span class="muted">'+used+' / '+cap+' パレット</span>'
+      +'<span class="capbar"><i style="width:'+(cap?used/cap*100:0)+'%"></i></span>'
+      +'<span class="muted">空き '+(cap-used)+'（最大 '+((cap-used)*S.config.maxPerPallet).toLocaleString()+'カゴ）</span></div>'
+      +'<div class="mapwrap"><table class="maptable"><tr><th></th>';
+    for(var c=1;c<=w.cols;c++) h+='<th>'+("0"+c).slice(-2)+'</th>';
+    h+='</tr>';
+    for(var r=1;r<=w.rows;r++){
+      h+='<tr><th>'+rowL(r)+'</th>';
+      for(var c2=1;c2<=w.cols;c2++){
+        h+='<td><div class="bay">';
+        for(var t=w.tiers;t>=1;t--){
+          var p=palletAt(w.id,r,c2,t), key=w.id+","+r+","+c2+","+t;
+          if(p){
+            var dim="";
+            if(hi){
+              var ok=false;
+              if(hi.indexOf("G:")===0) ok=(p.grade||"")===hi.slice(2);
+              else if(hi.indexOf("V:")===0) ok=pVarieties(p).indexOf(hi.slice(2))>=0;
+              else if(hi.indexOf("A:")===0) ok=p.lines.some(function(l){return (fld(l.fieldId)||{}).area===hi.slice(2);});
+        else if(hi==="W:washed") ok=!!p.washed;
+        else if(hi==="W:dirty") ok=!p.washed;
+        else if(hi==="W:d30"){var dd=daysBetween(p.inAt||pOldestHarvest(p),today());ok=!p.washed&&dd!=null&&dd>=30;}
+              if(!ok) dim=";opacity:.22";
+            }
+            h+='<div class="slot filled'+(UI.sel===p.id?" sel":"")+'" data-slot="'+key+'" data-p="'+p.id+'" style="border-left:5px solid '+slotColor(p,mode)+dim+'">'
+              +'<span class="tno">'+t+'</span><span class="pid">'+esc(p.id)+'</span><span class="qty">'+pCount(p)+'</span></div>';
+          }else{
+            h+='<div class="slot" data-slot="'+key+'"><span class="tno">'+t+'</span><span style="flex:1;text-align:center;font-size:10px">空</span></div>';
+          }
+        }
+        h+='</div></td>';
+      }
+      h+='</tr>';
+    }
+    h+='</table></div></div>';
+  });
+  $("#maps").innerHTML=h;
+  bindSlots(); renderLegend(mode); renderWashTray();
+  fitMap();
+}
+function renderLegend(mode){
+  var h="";
+  if(mode==="grade") h=GRADES.map(function(g){return '<span><span class="sw" style="background:'+GRADE_COLOR[g]+'"></span>'+g+'</span>';}).join("")+'<span><span class="sw" style="background:#c9c3ba"></span>未選別</span>';
+  else if(mode==="variety") h=S.config.varieties.map(function(v){return '<span><span class="sw" style="background:'+varColor(v)+'"></span>'+esc(v)+'</span>';}).join("");
+  else if(mode==="area") h=AREA_ORDER.map(function(a){return '<span><span class="sw" style="background:'+AREA_COLOR[a]+'"></span>'+a+'</span>';}).join("");
+  else if(mode==="fill") h='<span><span class="sw" style="background:#3f7d4e"></span>満杯</span><span><span class="sw" style="background:#c98a3f"></span>半分以上</span><span><span class="sw" style="background:#c06a1f"></span>半分未満</span>';
+  else h='<span><span class="sw" style="background:#7dbf8a"></span>〜45日</span><span><span class="sw" style="background:#e0b64f"></span>46〜90日</span><span><span class="sw" style="background:#d98040"></span>91〜150日</span><span><span class="sw" style="background:#b03a2e"></span>151日〜</span>';
+  $("#legend").innerHTML=h;
+}
+
+/* ---------- ドラッグ ---------- */
+function bindSlots(){
+  $$("#maps .slot").forEach(function(el){
+    el.addEventListener("pointerdown",onDown);
+    el.addEventListener("click",onSlotClick);
+  });
+}
+function onSlotClick(e){
+  if(UI.drag&&UI.drag.moved) return;
+  var el=e.currentTarget;
+  if(el.dataset.p) openPallet(el.dataset.p);
+  else{var a=el.dataset.slot.split(",").map(Number);goIntake({wh:a[0],r:a[1],c:a[2],t:a[3]});}
+}
+function bindSlots(){
+  $$("#maps .slot").forEach(function(el){ el.addEventListener("click",onSlotClick); });
+}
+function setDragMode(on){
+  hidePeek();
+  UI.dragMode=!!on;
+  UI.moveFrom=null;
+  if(!UI.dragMode){ UI.lastMove=null; UI.moveCount=0; }
+  else if(UI.moveCount===undefined){ UI.moveCount=0; }
+  document.body.classList.toggle("dragmode",UI.dragMode);
+  var b=$("#btnDrag");
+  if(b){ b.classList.toggle("on",UI.dragMode); b.textContent=UI.dragMode?"移動中：やめる":"パレットを移動する"; }
+  var t=$("#dragTip"); if(t) t.style.display=UI.dragMode?"block":"none";
+  var f=$("#fabMove");
+  if(f){ f.classList.toggle("on",UI.dragMode); f.innerHTML=UI.dragMode?"✕<span>やめる</span>":"⇄<span>移動</span>"; }
+  document.body.classList.toggle("movebar-open",UI.dragMode);
+  moveBar();
+  renderMaps();
+}
+function moveBar(){
+  var bar=document.getElementById("movebar");
+  if(!bar){ bar=document.createElement("div"); bar.id="movebar"; document.body.appendChild(bar); }
+  if(!UI.dragMode){ bar.classList.remove("show"); return; }
+  var last='';
+  if(UI.lastMove){
+    last='<div class="mvlast"><span>'+esc(UI.lastMove.text)+'</span>'
+       +'<button class="btn sec" id="mvUndo" style="padding:4px 10px">元に戻す</button></div>';
+  }
+  var head;
+  if(!UI.moveFrom){
+    head='<b>①</b><span>動かすパレットをタップ'
+       +(UI.moveCount?'<small style="opacity:.85"> ／ '+UI.moveCount+'枚 移動しました</small>':'')+'</span>';
+  }else{
+    var p=pById(UI.moveFrom);
+    head='<b>②</b><span>'+esc(UI.moveFrom)+' を <b>置きたいマス</b>にタップ'
+       +'<small style="opacity:.85"> ／ '+esc(p?locStr(p):"")+' から</small></span>';
+  }
+  bar.innerHTML='<div class="mvrow">'+head+'<button class="btn sec" id="mvCancel2" style="padding:5px 12px">やめる</button></div>'+last;
+  bar.classList.add("show");
+  var c=document.getElementById("mvCancel2");
+  if(c) c.onclick=function(){ setDragMode(false); };
+  var u=document.getElementById("mvUndo");
+  if(u) u.onclick=function(){ doUndo(); };
+}
+function onSlotClick(e){
+  var el=e.currentTarget;
+  if(UI.dragMode){
+    if(!UI.moveFrom){
+      if(!el.dataset.p){ toast("動かすパレットをタップしてください"); return; }
+      UI.moveFrom=el.dataset.p;
+      UI.sel=el.dataset.p; UI_SELKEY=el.dataset.slot;
+      renderMaps(); moveBar();
+      return;
+    }
+    var a=el.dataset.slot.split(",").map(Number);
+    var src2=pById(UI.moveFrom);
+    if(src2 && src2.loc && src2.wh===a[0] && src2.loc.r===a[1] && src2.loc.c===a[2] && src2.loc.t===a[3]){
+      toast("同じ場所です"); return;
+    }
+    var id=UI.moveFrom;
+    var occ=palletAt(a[0],a[1],a[2],a[3]);
+    if(occ){
+      ask(occ.id+"（"+pCount(occ)+"カゴ）がすでに置かれています。\n"+id+" と場所を入れ替えますか？","入れ替えの確認","入れ替える")
+      .then(function(yes){
+        if(!yes){ moveBar(); return; }
+        UI.moveFrom=null;
+        dropPallet(id,a[0],a[1],a[2],a[3],"",true);
+      });
+      return;
+    }
+    UI.moveFrom=null;
+    dropPallet(id,a[0],a[1],a[2],a[3]);
+    return;
+  }
+  var now=Date.now();
+  var isDouble=(TAP.el===el && now-TAP.t<400);
+  TAP.el=el; TAP.t=now;
+  selectSlot(el);
+  if(isDouble){ TAP.el=null; openSlot(el); }
+}
+var UNDO=null;
+function showUndo(msg){
+  var bar=document.getElementById("undobar");
+  if(!bar){ bar=document.createElement("div"); bar.id="undobar"; document.body.appendChild(bar); }
+  bar.innerHTML='<span>'+esc(msg)+'</span><button class="btn sec" id="undoBtn" style="padding:5px 12px">元に戻す</button>';
+  bar.classList.add("show");
+  document.getElementById("undoBtn").onclick=doUndo;
+  clearTimeout(bar._t);
+  bar._t=setTimeout(function(){ bar.classList.remove("show"); UNDO=null; },9000);
+}
+function hideUndo(){ var b=document.getElementById("undobar"); if(b) b.classList.remove("show"); UNDO=null; }
+function doUndo(){
+  if(!UNDO) return;
+  var u=UNDO; hideUndo();
+  if(UI.dragMode){ UI.lastMove=null; UI.moveCount=Math.max(0,(UI.moveCount||1)-1); moveBar(); }
+  var p=pById(u.id); if(!p) return;
+  p.wh=u.wh; p.loc=u.loc;
+  if(u.swapId){ var q=pById(u.swapId); if(q){ q.wh=u.swapWh; q.loc=u.swapLoc; } }
+  renderMaps(); renderKPI();
+  toast("元に戻しています…");
+  mutate("movePallet", u.id, u.wh, u.loc.r, u.loc.c, u.loc.t, "取り消し").then(function(){
+    if(u.swapId) return mutate("movePallet", u.swapId, u.swapWh, u.swapLoc.r, u.swapLoc.c, u.swapLoc.t, "取り消し");
+  }).then(function(){ toast("元に戻しました"); });
+}
+
+function dropPallet(id,w,r,c,t,note,skipAsk){
+  var p=pById(id); if(!p) return false;
+  if(p.loc&&p.wh===w&&p.loc.r===r&&p.loc.c===c&&p.loc.t===t) return false;
+  var occ=palletAt(w,r,c,t);
+  if(occ && !skipAsk){
+    ask(occ.id+"（"+pCount(occ)+"カゴ）がすでに置かれています。\n"+p.id+" と場所を入れ替えますか？","入れ替えの確認","入れ替える")
+      .then(function(yes){ if(yes) dropPallet(id,w,r,c,t,note,true); });
+    return false;
+  }
+  var from=locStr(p);
+  var undo={id:p.id, wh:p.wh, loc:p.loc?{r:p.loc.r,c:p.loc.c,t:p.loc.t}:null};
+  if(occ){
+    undo.swapId=occ.id; undo.swapWh=occ.wh; undo.swapLoc=occ.loc?{r:occ.loc.r,c:occ.loc.c,t:occ.loc.t}:null;
+    var oldWh=p.wh, oldLoc=p.loc; p.wh=w; p.loc={r:r,c:c,t:t}; occ.wh=oldWh; occ.loc=oldLoc;
+  } else { p.wh=w; p.loc={r:r,c:c,t:t}; }
+  renderMaps(); renderKPI();
+  UNDO = undo.loc ? undo : null;
+  var msg = from+" → "+locStr(p)+(occ?"（"+occ.id+"と入替）":"");
+  if(UI.dragMode){
+    UI.moveCount=(UI.moveCount||0)+1;
+    UI.lastMove={text:msg};
+    moveBar();
+  }
+  mutate("movePallet",id,w,r,c,t,note||"").then(function(){
+    if(UI.dragMode){ toast("保存しました（"+UI.moveCount+"枚目）"); moveBar(); }
+    else if(UNDO) showUndo(msg+" 保存しました");
+    else toast("保存しました");
+  });
+  return true;
+}
+
+/* ---------- パレット詳細 ---------- */
+function openPallet(id){
+  var p=pById(id); if(!p) return;
+  UI.sel=id;
+  $("#dTitle").textContent="パレット "+p.id+(p.status==="出庫済"?"（出庫済）":(p.status==="洗浄中"?"（洗浄中）":""))+(p.washed?" 💧洗浄済":"");
+  $("#dLoc").textContent=locStr(p);
+  $("#dCnt").textContent=pCount(p);
+  $("#dKg").textContent=r1(pKg(p)).toLocaleString();
+  var d=daysBetween(pOldestHarvest(p),today());
+  $("#dAge").textContent=d==null?"—":d+"日";
+  $("#dMeta").textContent=p.updatedAt?("最終更新 "+p.updatedAt+"（"+(p.updatedBy||"")+"）"):"";
+  $("#dGrade").value=p.grade||"";
+  $("#dIn").value=p.inAt||"";
+  $("#dNote").value=p.note||"";
+  $("#dMove").disabled=p.status!=="在庫";
+  $("#dShip").disabled=p.status!=="在庫";
+  renderDLines(p); renderDLog(p);
+  $("#drawer").classList.add("open"); renderMaps();
+}
+function closeDrawer(){$("#drawer").classList.remove("open");UI.sel=null;renderMaps();}
+function renderDLines(p){
+  var h='<tr><th>収穫日</th><th>圃場</th><th>品種</th><th class="num">カゴ</th><th class="num">kg</th><th></th></tr>';
+  if(!p.lines.length) h+='<tr><td colspan="6" class="muted">中身なし</td></tr>';
+  p.lines.forEach(function(l,i){
+    h+='<tr><td><input type="date" value="'+esc(l.harvestAt||"")+'" data-i="'+i+'" data-k="harvestAt" style="width:130px"></td>'
+      +'<td>'+esc(fldName(l.fieldId))+'</td><td>'+esc(l.variety||"")+'</td>'
+      +'<td class="num"><input type="number" step="0.25" min="0" value="'+(l.count||0)+'" data-i="'+i+'" data-k="count" inputmode="decimal" style="width:70px;text-align:right"></td>'
+      +'<td class="num">'+r1((Number(l.count)||0)*S.config.unitWeightKg)+'</td>'
+      +'<td><button class="btn ghost" data-del="'+i+'" style="padding:2px 7px">削除</button></td></tr>';
+  });
+  $("#dLines").innerHTML=h;
+  $$("#dLines input").forEach(function(el){el.onchange=function(){
+    var q=pById(UI.sel),i=+el.dataset.i;
+    if(el.dataset.k==="count") q.lines[i].count=r2(Math.max(0,Number(el.value)||0));
+    else q.lines[i].harvestAt=el.value;
+    renderDLines(q);$("#dCnt").textContent=pCount(q);$("#dKg").textContent=r1(pKg(q)).toLocaleString();
+  };});
+  $$("#dLines button[data-del]").forEach(function(el){el.onclick=function(){var q=pById(UI.sel);q.lines.splice(+el.dataset.del,1);renderDLines(q);};});
+}
+function renderDLog(p){
+  var rows=S.log.filter(function(x){return x.palletId===p.id;}).slice().reverse();
+  var h='<tr><th>日時</th><th>種別</th><th>移動</th><th>内容</th><th>担当</th></tr>';
+  if(!rows.length) h+='<tr><td colspan="5" class="muted">履歴なし</td></tr>';
+  rows.forEach(function(x){h+='<tr><td>'+esc(x.ts)+'</td><td>'+esc(x.type)+'</td><td>'+esc(x.from?x.from+" → "+x.to:x.to)+'</td><td>'+esc(x.detail)+'</td><td>'+esc(x.user)+'</td></tr>';});
+  $("#dLog").innerHTML=h;
+}
+
+/* ---------- 入庫 ---------- */
+function renderIntake(){
+  var h='<tr><th>収穫日</th><th>圃場</th><th>品種</th><th class="num">カゴ</th><th class="num">kg</th><th></th></tr>', tot=0;
+  if(!intakeLines.length) h+='<tr><td colspan="6" class="muted">上のフォームで行を追加してください</td></tr>';
+  intakeLines.forEach(function(l,i){tot+=Number(l.count)||0;
+    h+='<tr><td>'+esc(l.harvestAt)+'</td><td>'+esc(fldName(l.fieldId))+'</td><td>'+esc(l.variety)+'</td>'
+      +'<td class="num">'+l.count+'</td><td class="num">'+r1(l.count*S.config.unitWeightKg)+'</td>'
+      +'<td><button class="btn ghost" data-x="'+i+'" style="padding:2px 7px">削除</button></td></tr>';});
+  if(intakeLines.length) h+='<tr style="background:#f5f3f0"><td colspan="3"><b>合計</b></td><td class="num"><b>'+tot+'</b>'
+    +(tot>S.config.maxPerPallet?' <span style="color:var(--danger)">上限'+S.config.maxPerPallet+'超</span>':'')
+    +'</td><td class="num"><b>'+r1(tot*S.config.unitWeightKg)+'</b></td><td></td></tr>';
+  $("#iLines").innerHTML=h;
+  $$("#iLines button[data-x]").forEach(function(el){el.onclick=function(){intakeLines.splice(+el.dataset.x,1);renderIntake();};});
+  updateSuggest();
+  var man=$("#iPlace").value==="manual";
+  ["#wRow","#wCol","#wTier"].forEach(function(s){$(s).style.display=man?"":"none";});
+  refreshNextId();
+}
+var nextIdTimer=null;
+function refreshNextId(){
+  clearTimeout(nextIdTimer);
+  nextIdTimer=setTimeout(function(){
+    call("peekNextPalletId")
+      .then(function(v){$("#iNextId").textContent=v;})
+      .catch(function(){$("#iNextId").textContent="—";});
+  },300);
+}
+function updateSuggest(){
+  var mode=$("#iPlace").value;
+  if(mode==="none"){$("#iSuggest").textContent="未配置で登録します。あとからマップにドラッグで置けます。";return;}
+  if(mode==="manual"){$("#iSuggest").textContent="指定した位置に置きます。埋まっている場合はエラーになります。";return;}
+  var s=suggestSlot(Number($("#iWh").value),intakeLines);
+  $("#iSuggest").innerHTML=s?("おすすめ位置：<b>"+esc(locStr2(s.wh,s.r,s.c,s.t))+"</b> — "+esc(s.why)):"空きがありません。";
+}
+function suggestSlot(whId,lines){
+  var w=wh(whId); if(!w) return null;
+  var v=(lines[0]||{}).variety||"", hv=(lines[0]||{}).harvestAt||"", free=[];
+  for(var c=1;c<=w.cols;c++) for(var r=1;r<=w.rows;r++) for(var t=1;t<=w.tiers;t++)
+    if(!palletAt(whId,r,c,t)) free.push({wh:whId,r:r,c:c,t:t});
+  if(!free.length){
+    var other=S.config.warehouses.filter(function(x){return x.id!==whId;})[0];
+    return other?suggestSlot(other.id,lines):null;
+  }
+  var doorMax=S.config.door==="max";
+  free.forEach(function(s){
+    var sc=0, why=[];
+    sc+=(w.tiers-s.t)*10; if(s.t===1) why.push("下段から");
+    if(s.t>1&&palletAt(whId,s.r,s.c,s.t-1)) sc+=25;
+    var near=0;
+    for(var dc=-1;dc<=1;dc++) for(var dr=-1;dr<=1;dr++) for(var tt=1;tt<=w.tiers;tt++){
+      var q=palletAt(whId,s.r+dr,s.c+dc,tt); if(!q) continue;
+      if(v&&pVarieties(q).indexOf(v)>=0) near+=6;
+      var dd=pOldestHarvest(q)&&hv?Math.abs(daysBetween(pOldestHarvest(q),hv)):99;
+      if(dd<=3) near+=6;
+    }
+    if(near) why.push("同ロットの近く");
+    sc+=Math.min(near,40);
+    var dist=doorMax?(w.cols-s.c):(s.c-1);
+    sc+=dist*1.5; why.push("奥から詰める");
+    s._sc=sc; s._why=why;
+  });
+  free.sort(function(a,b){return b._sc-a._sc;});
+  var b=free[0];
+  return {wh:b.wh,r:b.r,c:b.c,t:b.t,why:b._why.join("・")};
+}
+function doIntake(cont){
+  if(!intakeLines.length){toast("中身を1行以上追加してください");return;}
+  var date=(intakeLines[0]&&intakeLines[0].harvestAt)||$("#iHarvest").value||today();
+  var whId=Number($("#iWh").value), loc=null, mode=$("#iPlace").value;
+  if(mode==="auto"){ var s=suggestSlot(whId,intakeLines); if(s){whId=s.wh;loc={r:s.r,c:s.c,t:s.t};} }
+  else if(mode==="manual"){
+    var r=Number($("#iRow").value),c=Number($("#iCol").value),t=Number($("#iTier").value);
+    var occ=palletAt(whId,r,c,t);
+    if(occ){toast("その位置は "+occ.id+" が使用中です");return;}
+    loc={r:r,c:c,t:t};
+  }
+  var keep={h:$("#iHarvest").value,a:$("#iArea").value,v:$("#iVar").value,w:$("#iWh").value};
+  var payload={wh:whId,loc:loc,grade:$("#iGrade").value,washed:$("#iWash").value,inAt:date,note:$("#iNote").value||"",lines:intakeLines.slice()};
+  intakeLines=[]; $("#iNote").value=""; renderIntake();
+  /* 楽観更新: 画面を先に確定し、保存は裏で行う */
+  var tidTxt=(($("#iNextId")||{}).textContent||"").trim();
+  var temp={id:(/^P\d+$/.test(tidTxt)?tidTxt:"P----"),wh:payload.wh,
+    loc:payload.loc?{r:payload.loc.r,c:payload.loc.c,t:payload.loc.t}:null,
+    status:"在庫",grade:payload.grade||"",inAt:date,outAt:"",note:payload.note||"",
+    updatedAt:"",updatedBy:"",washed:(payload.washed==="済"?"済":""),
+    lines:JSON.parse(JSON.stringify(payload.lines)),_tmp:1};
+  S.pallets.push(temp);
+  $("#iHarvest").value=keep.h;$("#iArea").value=keep.a;refreshIField();$("#iVar").value=keep.v;$("#iWh").value=keep.w;
+  renderAll();
+  toast("入庫しました（保存中…）");
+  if(!cont) switchTab("map");
+  enqueue(function(){ return call("createPallet",payload); }).then(applyState).catch(function(e){
+    S.pallets=S.pallets.filter(function(x){return x!==temp;});
+    renderAll();
+    toast("入庫の保存に失敗しました: "+(e&&e.message?e.message:e));
+    reload();
+  });
+}
+function goIntake(slot){
+  switchTab("in");
+  if(slot){$("#iWh").value=slot.wh;$("#iPlace").value="manual";buildLocSelects();$("#iRow").value=slot.r;$("#iCol").value=slot.c;$("#iTier").value=slot.t;}
+  renderIntake();
+}
+function renderRecent(){
+  var rows=S.pallets.slice().sort(function(a,b){return a.id<b.id?1:-1;}).slice(0,20);
+  var h='<tr><th>番号</th><th>入庫日</th><th>場所</th><th>等級</th><th>品種</th><th>圃場</th><th class="num">カゴ</th></tr>';
+  if(!rows.length) h+='<tr><td colspan="7" class="muted">まだありません</td></tr>';
+  rows.forEach(function(p){h+='<tr style="cursor:pointer" data-p="'+p.id+'"><td><b>'+esc(p.id)+'</b></td><td>'+esc(p.inAt)+'</td><td>'+esc(locStr(p))+'</td><td>'+esc(p.grade||"未選別")+'</td><td>'+esc(pVarieties(p).join(","))+'</td><td>'+esc(uniq(p.lines.map(function(l){return fldName(l.fieldId);})).join(" / "))+'</td><td class="num">'+pCount(p)+'</td></tr>';});
+  $("#iRecent").innerHTML=h;
+  $$("#iRecent tr[data-p]").forEach(function(el){el.onclick=function(){openPallet(el.dataset.p);};});
+}
+
+/* ---------- 移動モーダル ---------- */
+function openMove(){
+  var p=pById(UI.sel); if(!p||p.status!=="在庫") return;
+  $("#mvFrom").textContent="現在地："+locStr(p)+" ／ "+pCount(p)+"カゴ";
+  $("#mvWh").innerHTML=S.config.warehouses.map(function(w){return '<option value="'+w.id+'">'+esc(w.name)+'</option>';}).join("");
+  $("#mvWh").value=p.wh;
+  fillLoc("#mvRow","#mvCol","#mvTier",p.wh);
+  if(p.loc){$("#mvRow").value=p.loc.r;$("#mvCol").value=p.loc.c;$("#mvTier").value=p.loc.t;}
+  $("#mvNote").value="";
+  mvCheck(); $("#mvModal").classList.add("open");
+}
+function fillLoc(rs,cs,ts,whId){
+  var w=wh(whId)||{rows:6,cols:10,tiers:3},i,h="";
+  for(i=1;i<=w.rows;i++) h+='<option value="'+i+'">'+rowL(i)+'</option>'; $(rs).innerHTML=h;
+  h=""; for(i=1;i<=w.cols;i++) h+='<option value="'+i+'">'+("0"+i).slice(-2)+'</option>'; $(cs).innerHTML=h;
+  h=""; for(i=1;i<=w.tiers;i++) h+='<option value="'+i+'">'+i+'段</option>'; $(ts).innerHTML=h;
+}
+function mvCheck(){
+  var p=pById(UI.sel); if(!p) return;
+  var w=Number($("#mvWh").value),r=+$("#mvRow").value,c=+$("#mvCol").value,t=+$("#mvTier").value;
+  var occ=palletAt(w,r,c,t), b=$("#mvInfo");
+  if(occ&&occ.id!==p.id){b.style.display="block";b.textContent="この位置には "+occ.id+"（"+pCount(occ)+"カゴ）があります。実行すると2枚を入れ替えます。";}
+  else b.style.display="none";
+}
+function doMove(){
+  var p=pById(UI.sel); if(!p) return;
+  var w=Number($("#mvWh").value),r=+$("#mvRow").value,c=+$("#mvCol").value,t=+$("#mvTier").value;
+  $("#mvModal").classList.remove("open");
+  dropPallet(p.id,w,r,c,t,$("#mvNote").value);
+}
+
+/* ---------- 出庫 ---------- */
+function openShip(){
+  var p=pById(UI.sel); if(!p||p.status!=="在庫") return;
+  $("#spInfo").textContent=p.id+"（"+locStr(p)+"） 現在 "+pCount(p)+"カゴ / "+r1(pKg(p))+"kg";
+  $("#spDate").value=today(); $("#spDest").value=""; $("#spLoss").value=""; $("#spNote").value="";
+  $("#spPrice").value=""; $("#spAmt").value=""; $("#spKind").value="出荷";
+  renderShipLines(p,true); spKindChange(); $("#spModal").classList.add("open");
+}
+function renderShipLines(p,full){
+  var h='<tr><th>収穫日</th><th>圃場</th><th>品種</th><th class="num">在庫</th><th class="num">出す数</th><th class="num">kg</th></tr>';
+  p.lines.forEach(function(l,i){
+    h+='<tr><td>'+esc(l.harvestAt||"")+'</td><td>'+esc(fldName(l.fieldId))+'</td><td>'+esc(l.variety||"")+'</td>'
+      +'<td class="num">'+l.count+'</td>'
+      +'<td class="num"><input type="number" step="0.25" min="0" max="'+l.count+'" value="'+(full?l.count:0)+'" data-si="'+i+'" inputmode="decimal" style="width:74px;text-align:right"></td>'
+      +'<td class="num" data-kg="'+i+'">'+r1((full?l.count:0)*S.config.unitWeightKg)+'</td></tr>';
+  });
+  $("#spLines").innerHTML=h;
+  $$("#spLines input").forEach(function(el){el.oninput=spCalc;});
+  spCalc();
+}
+function spCalc(){
+  var p=pById(UI.sel); if(!p) return;
+  var cnt=0;
+  $$("#spLines input").forEach(function(el){
+    var i=+el.dataset.si, v=r2(Math.min(p.lines[i].count,Math.max(0,Number(el.value)||0)));
+    if(Number(el.value)!==v) el.value=v;
+    cnt+=v;
+    var td=$('#spLines td[data-kg="'+i+'"]'); if(td) td.textContent=r1(v*S.config.unitWeightKg);
+  });
+  var kg=cnt*S.config.unitWeightKg, price=Number($("#spPrice").value)||0;
+  if(price>0) $("#spAmt").value=Math.round(kg*price);
+  $("#spSum").textContent="出庫 "+r2(cnt)+"カゴ / "+r1(kg).toLocaleString()+"kg"+(cnt>=pCount(p)&&cnt>0?"（全量）":"");
+}
+function spKindChange(){
+  var k=$("#spKind").value, wash=k==="洗浄";
+  $("#spDestWrap").style.display=(k==="廃棄・ロス"||wash)?"none":"";
+  $("#spLossWrap").style.display=k==="廃棄・ロス"?"":"none";
+  $("#spPrice").disabled=wash; $("#spAmt").disabled=wash;
+  var p=pById(UI.sel);
+  $$("#spLines input").forEach(function(el){
+    if(wash){ if(p&&p.lines[+el.dataset.si]) el.value=p.lines[+el.dataset.si].count; el.disabled=true; }
+    else el.disabled=false;
+  });
+  if(wash) spCalc();
+  $("#spOk").textContent=wash?"洗浄に出す（全量）":"出庫を記録する";
+}
+function doShip(){
+  var p=pById(UI.sel); if(!p) return;
+  var picks=[], cnt=0;
+  p.lines.forEach(function(){picks.push(0);});
+  $$("#spLines input").forEach(function(el){var i=+el.dataset.si,v=Math.max(0,Number(el.value)||0);picks[i]=v;cnt+=v;});
+  var kind=$("#spKind").value;
+  if(!cnt){toast("出す数量を入力してください");return;}
+  var payload={palletId:p.id,date:$("#spDate").value||today(),kind:kind,picks:picks,
+    dest:$("#spDest").value,lossReason:$("#spLoss").value,
+    unitPrice:$("#spPrice").value===""?null:Number($("#spPrice").value),
+    amount:$("#spAmt").value===""?null:Number($("#spAmt").value),
+    note:$("#spNote").value};
+  $("#spModal").classList.remove("open");
+  /* 楽観更新: 画面を先に確定し、保存は裏で行う */
+  var snap=JSON.parse(JSON.stringify(p));
+  if(kind==="洗浄"){ p.lines=[]; p.status="出庫済"; p.loc=null; }
+  else{
+    p.lines=p.lines.map(function(l,i){
+      var nl=JSON.parse(JSON.stringify(l));
+      nl.count=r2(Math.max(0,(Number(l.count)||0)-(picks[i]||0)));
+      return nl;
+    }).filter(function(l){return l.count>0;});
+    if(!p.lines.length){ p.status="出庫済"; p.loc=null; }
+  }
+  if(p.status!=="在庫"){ closeDrawer(); hidePeek(); } else openPallet(p.id);
+  renderAll();
+  toast(kind==="洗浄"?cnt+"カゴを洗浄向けに全量出庫しました。洗浄が済んだら入庫タブで「洗浄済 💧」を選んで入庫し直してください":cnt+"カゴを出庫記録しました（保存中…）");
+  enqueue(function(){ return call("shipPallet",payload); }).then(applyState).catch(function(e){
+    for(var si=0;si<S.pallets.length;si++){ if(S.pallets[si].id===snap.id){ S.pallets[si]=snap; break; } }
+    renderAll();
+    toast("出庫の保存に失敗しました: "+(e&&e.message?e.message:e));
+    reload();
+  });
+}
+
+/* ---------- 洗浄中トレー ---------- */
+function washShip_(pid){
+  var list=S.shipments.filter(function(s){return s.kind==="洗浄"&&s.palletId===pid&&!s.canceled;});
+  return list.length?list[list.length-1]:null;
+}
+function renderWashTray(){
+  var e=document.getElementById("washTray"); if(!e) return;
+  var ws=washing();
+  if(!ws.length){ e.innerHTML=""; e.style.display="none"; return; }
+  e.style.display="";
+  var h='<div class="wt-head">🧼 洗浄中 '+ws.length+'パレット（旧方式の残り） — 「入庫し直す」か「取消」で整理してください</div><div class="wt-cards">';
+  ws.forEach(function(p){
+    var s=washShip_(p.id);
+    h+='<div class="wt-card"><div class="wt-l1">'+gradeBadge(p.grade)+'<b>'+esc(p.id)+'</b>'
+      +'<span class="muted" style="font-size:11px">'+(s?esc(s.date)+" 出庫":"")+'</span></div>'
+      +'<div class="wt-l2">'+esc(uniq(p.lines.map(function(l){return fldName(l.fieldId);})).join(" / "))+'</div>'
+      +'<div class="wt-l3"><b>'+pCount(p)+'</b> カゴ</div>'
+      +'<div class="wt-btns"><button class="btn" data-wret="'+p.id+'" style="padding:6px 10px;font-size:12px">↩ 入庫し直す</button>'
+      +(s?'<button class="btn ghost" data-wcan="'+s.id+'" style="padding:6px 10px;font-size:12px">取消</button>':'')
+      +'</div></div>';
+  });
+  e.innerHTML=h+'</div>';
+  $$("#washTray [data-wret]").forEach(function(el){el.onclick=function(){openWashReturn(el.dataset.wret);};});
+  $$("#washTray [data-wcan]").forEach(function(el){el.onclick=function(){
+    ask("洗浄出庫を取り消して、土付きのまま在庫に戻しますか？\n元の場所が空いていればそこへ戻ります。","取消").then(function(y){
+      if(!y) return;
+      mutate("cancelShip",el.dataset.wcan).then(function(){toast("在庫に戻しました");});
+    });
+  };});
+}
+var WM=null;
+function openWashReturn(pid){
+  var p=pById(pid); if(!p||p.status!=="洗浄中") return;
+  WM=pid;
+  $("#wmInfo").textContent=p.id+"　洗浄前 "+pCount(p)+"カゴ ／ カゴ数が変わった場合は下で直してください";
+  $("#wmWh").innerHTML=S.config.warehouses.map(function(w){return '<option value="'+w.id+'"'+(w.id===p.wh?' selected':'')+'>'+esc(w.name)+'</option>';}).join("");
+  var h='<tr><th>収穫日</th><th>圃場</th><th>品種</th><th class="num">洗浄前</th><th class="num">戻すカゴ数</th></tr>';
+  p.lines.forEach(function(l,i){
+    h+='<tr><td>'+esc(l.harvestAt||"")+'</td><td>'+esc(fldName(l.fieldId))+'</td><td>'+esc(l.variety||"")+'</td>'
+      +'<td class="num">'+l.count+'</td>'
+      +'<td class="num"><input type="number" step="0.25" min="0" value="'+l.count+'" data-wi="'+i+'" inputmode="decimal" style="width:80px;text-align:right"></td></tr>';
+  });
+  $("#wmLines").innerHTML=h;
+  $$("#wmLines input").forEach(function(el){el.oninput=wmCalc;});
+  wmCalc();
+  $("#wmModal").classList.add("open");
+}
+function wmCalc(){
+  var c=0; $$("#wmLines input").forEach(function(el){c+=Math.max(0,Number(el.value)||0);});
+  $("#wmSum").textContent="合計 "+r2(c)+"カゴ / "+r1(c*S.config.unitWeightKg).toLocaleString()+"kg";
+}
+function doWashReturn(){
+  var p=pById(WM); if(!p) return;
+  var counts=p.lines.map(function(l){return l.count;});
+  $$("#wmLines input").forEach(function(el){counts[+el.dataset.wi]=Math.max(0,Number(el.value)||0);});
+  if(!counts.some(function(v){return v>0;})){toast("カゴ数を入力してください");return;}
+  $("#wmModal").classList.remove("open");
+  var pid=WM;
+  mutate("washReturn",{palletId:pid,wh:Number($("#wmWh").value),counts:counts}).then(function(){
+    var q=pById(pid);
+    toast(q&&q.loc?(pid+" を "+locStr(q)+" に戻しました（洗浄済 💧）"):"戻しました");
+  });
+}
+
+/* ---------- 出荷記録 ---------- */
+function shipFiltered(){
+  var f=$("#oFrom").value,t=$("#oTo").value,k=$("#oKind").value,q=$("#oQ").value.trim();
+  return S.shipments.filter(function(s){
+    return (!f||s.date>=f)&&(!t||s.date<=t)&&(!k||s.kind===k)&&
+      (!q||(s.dest||"").indexOf(q)>=0||(s.note||"").indexOf(q)>=0||(s.lossReason||"").indexOf(q)>=0);
+  });
+}
+function renderShipTab(){
+  var rows=shipFiltered();
+  var live=rows.filter(function(s){return !s.canceled;});
+  var kg=live.reduce(function(a,s){return a+s.kg;},0);
+  var amt=live.reduce(function(a,s){return a+(s.amount||0);},0);
+  var loss=live.filter(function(s){return s.kind==="廃棄・ロス";}).reduce(function(a,s){return a+s.kg;},0);
+  $("#oStat").innerHTML='<div><span>件数</span><b>'+live.length+'</b></div>'
+    +'<div><span>カゴ</span><b>'+live.reduce(function(a,s){return a+s.count;},0).toLocaleString()+'</b></div>'
+    +'<div><span>重量kg</span><b>'+r1(kg).toLocaleString()+'</b></div>'
+    +'<div><span>金額円</span><b>'+amt.toLocaleString()+'</b></div>'
+    +'<div><span>ロスkg</span><b>'+r1(loss).toLocaleString()+'</b></div>'
+    +'<div><span>ロス率</span><b>'+(kg?Math.round(loss/kg*100):0)+'%</b></div>';
+  var h='<tr><th>日付</th><th>区分</th><th>パレット</th><th>等級</th><th>圃場</th><th>品種</th><th class="num">カゴ</th><th class="num">kg</th><th>出荷先/理由</th><th class="num">単価</th><th class="num">金額</th><th>担当</th><th>メモ</th><th></th></tr>';
+  if(!rows.length) h+='<tr><td colspan="14" class="muted">該当なし</td></tr>';
+  rows.slice().reverse().forEach(function(s){
+    h+='<tr'+(s.canceled?' style="opacity:.45"':'')+'><td>'+esc(s.date)+'</td><td>'+esc(s.kind)+(s.canceled?' <span class="pill" style="background:#ddd6cc">取消済</span>':'')+'</td><td>'+esc(s.palletId)+'</td><td>'+esc(s.grade||"未選別")+'</td>'
+      +'<td>'+esc(uniq(s.items.map(function(i){return fldName(i.fieldId);})).join(" / "))+'</td>'
+      +'<td>'+esc(uniq(s.items.map(function(i){return i.variety;})).join(","))+'</td>'
+      +'<td class="num">'+s.count+'</td><td class="num">'+r1(s.kg)+'</td>'
+      +'<td>'+esc(s.dest||s.lossReason||"")+'</td><td class="num">'+(s.unitPrice||"")+'</td><td class="num">'+(s.amount?s.amount.toLocaleString():"")+'</td>'
+      +'<td>'+esc(s.user)+'</td><td>'+esc(s.note)+'</td>'
+      +'<td>'+(s.canceled?'':'<button class="btn ghost" data-cancel="'+esc(s.id)+'" style="padding:3px 8px;font-size:11px">取消</button>')+'</td></tr>';
+  });
+  $("#oTbl").innerHTML=h;
+  $$("#oTbl [data-cancel]").forEach(function(el){el.onclick=function(){
+    ask("この出庫記録を取り消して、在庫に戻しますか？\nパレットが庫外の場合は空きマスへ戻ります。","出庫の取消").then(function(y){
+      if(!y) return;
+      mutate("cancelShip",el.dataset.cancel).then(function(){toast("取り消して在庫に戻しました");});
+    });
+  };});
+}
+
+/* ---------- 在庫一覧 ---------- */
+function renderStock(){
+  var w=$("#sWh").value,g=$("#sGrade").value,v=$("#sVar").value,a=$("#sArea").value,q=$("#sQ").value.trim(),srt=$("#sSort").value;
+  var rows=inStock();
+  if(w) rows=rows.filter(function(p){return String(p.wh)===w;});
+  if(g) rows=rows.filter(function(p){return (p.grade||"")===(g==="__none__"?"":g);});
+  var wm=$("#sWash").value;
+  if(wm==="w") rows=rows.filter(function(p){return !!p.washed;});
+  if(wm==="d") rows=rows.filter(function(p){return !p.washed;});
+  if(v) rows=rows.filter(function(p){return pVarieties(p).indexOf(v)>=0;});
+  if(a) rows=rows.filter(function(p){return p.lines.some(function(l){return (fld(l.fieldId)||{}).area===a;});});
+  if(q) rows=rows.filter(function(p){return p.id.indexOf(q)>=0||(p.note||"").indexOf(q)>=0||p.lines.some(function(l){return fldName(l.fieldId).indexOf(q)>=0;});});
+  if(srt==="loc") rows.sort(function(x,y){return (x.wh-y.wh)||((x.loc?x.loc.r:99)-(y.loc?y.loc.r:99))||((x.loc?x.loc.c:99)-(y.loc?y.loc.c:99))||((y.loc?y.loc.t:0)-(x.loc?x.loc.t:0));});
+  else if(srt==="old") rows.sort(function(x,y){return String(pOldestHarvest(x)||"9999").localeCompare(String(pOldestHarvest(y)||"9999"));});
+  else rows.sort(function(x,y){return y.id.localeCompare(x.id);});
+  var h='<tr><th>番号</th><th>場所</th><th>等級</th><th>品種</th><th>圃場</th><th>収穫日</th><th class="num">貯蔵日数</th><th class="num">カゴ</th><th class="num">kg</th><th>入庫日</th><th>メモ</th></tr>';
+  if(!rows.length) h+='<tr><td colspan="11" class="muted">該当なし</td></tr>';
+  rows.forEach(function(p){
+    var hd=pOldestHarvest(p), d=daysBetween(hd,today());
+    h+='<tr style="cursor:pointer" data-p="'+p.id+'"><td><b>'+esc(p.id)+'</b>'+(p.washed?' 💧':'')+'</td><td>'+esc(locStr(p))+'</td>'
+      +'<td>'+(p.grade?'<span class="pill" style="background:'+GRADE_COLOR[p.grade]+'">'+esc(p.grade)+'</span>':'<span class="muted">未選別</span>')+'</td>'
+      +'<td>'+esc(pVarieties(p).join(","))+'</td><td>'+esc(uniq(p.lines.map(function(l){return fldName(l.fieldId);})).join(" / "))+'</td>'
+      +'<td>'+esc(hd||"")+'</td><td class="num">'+(d==null?"":d)+'</td>'
+      +'<td class="num">'+pCount(p)+'</td><td class="num">'+r1(pKg(p))+'</td><td>'+esc(p.inAt||"")+'</td><td>'+esc(p.note||"")+'</td></tr>';
+  });
+  $("#sTbl").innerHTML=h;
+  $$("#sTbl tr[data-p]").forEach(function(el){el.onclick=function(){openPallet(el.dataset.p);};});
+}
+
+/* ---------- 集計 ---------- */
+function stockRows(){
+  var out=[];
+  var we=document.getElementById("aWash"), wm=we?we.value:"";
+  inStock().forEach(function(p){
+    if(wm==="w"&&!p.washed) return;
+    if(wm==="d"&&p.washed) return;
+    p.lines.forEach(function(l){
+    var f=fld(l.fieldId)||{};
+    out.push({grade:p.grade||"未選別",area:f.area||"その他",fieldId:l.fieldId,variety:l.variety||"",wh:p.wh,
+      count:Number(l.count)||0,kg:(Number(l.count)||0)*S.config.unitWeightKg});
+  });});
+  return out;
+}
+function pivotHtml(rows,rk,ck,R,C,label){
+  var m={};
+  rows.forEach(function(r){var k=rk(r)+"|"+ck(r);m[k]=m[k]||{c:0,kg:0};m[k].c+=r.count;m[k].kg+=r.kg;});
+  var h='<tr><th>'+label+'</th>'+C.map(function(c){return '<th class="num">'+esc(c)+'</th>';}).join("")+'<th class="num">合計</th></tr>';
+  var ct={}; C.forEach(function(c){ct[c]={c:0,kg:0};}); var g={c:0,kg:0};
+  R.forEach(function(r){
+    var rc=0,rkg=0;
+    h+='<tr><td>'+esc(r)+'</td>';
+    C.forEach(function(c){
+      var v=m[r+"|"+c]||{c:0,kg:0}; rc+=v.c; rkg+=v.kg; ct[c].c+=v.c; ct[c].kg+=v.kg;
+      h+='<td class="num">'+(v.c?v.c+'<br><span class="muted">'+r1(v.kg).toLocaleString()+'kg</span>':'—')+'</td>';
+    });
+    g.c+=rc; g.kg+=rkg;
+    h+='<td class="num"><b>'+rc+'</b><br><span class="muted">'+r1(rkg).toLocaleString()+'kg</span></td></tr>';
+  });
+  h+='<tr style="background:#f5f3f0"><td><b>合計</b></td>'+C.map(function(c){return '<td class="num"><b>'+ct[c].c+'</b><br><span class="muted">'+r1(ct[c].kg).toLocaleString()+'kg</span></td>';}).join("")
+    +'<td class="num"><b>'+g.c+'</b><br><span class="muted">'+r1(g.kg).toLocaleString()+'kg</span></td></tr>';
+  return h;
+}
+function renderAgg(){
+  var rows=stockRows();
+  var wc=0,dc=0;
+  inStock().forEach(function(p){ if(p.washed) wc+=pCount(p); else dc+=pCount(p); });
+  var el=$("#aWashSum");
+  if(el) el.textContent="庫内合計 ─ 土付き "+r2(dc).toLocaleString()+"カゴ ／ 洗浄済 💧 "+r2(wc).toLocaleString()+"カゴ";
+  var areas=AREA_ORDER.filter(function(a){return rows.some(function(r){return r.area===a;});});
+  var gs=GRADES.concat(["未選別"]).filter(function(g){return rows.some(function(r){return r.grade===g;});});
+  $("#aGA").innerHTML=pivotHtml(rows,function(r){return r.grade;},function(r){return r.area;},gs,areas,"等級");
+  var vs=uniq(rows.map(function(r){return r.variety||"（未設定）";}));
+  var wn=S.config.warehouses.map(function(w){return w.name;});
+  $("#aVW").innerHTML=pivotHtml(rows,function(r){return r.variety||"（未設定）";},function(r){return (wh(r.wh)||{name:"?"}).name;},vs,wn,"品種");
+
+  var fm={};
+  rows.forEach(function(r){fm[r.fieldId]=fm[r.fieldId]||{c:0,kg:0,g:{}};fm[r.fieldId].c+=r.count;fm[r.fieldId].kg+=r.kg;fm[r.fieldId].g[r.grade]=(fm[r.fieldId].g[r.grade]||0)+r.count;});
+  var gcols=GRADES.concat(["未選別"]);
+  var h='<tr><th>圃場ID</th><th>圃場名</th><th>エリア</th><th class="num">面積a</th>'+gcols.map(function(g){return '<th class="num">'+g+'</th>';}).join("")+'<th class="num">合計カゴ</th><th class="num">kg</th><th class="num">kg/a</th></tr>';
+  var ks=Object.keys(fm).sort();
+  if(!ks.length) h+='<tr><td colspan="'+(7+gcols.length)+'" class="muted">在庫なし</td></tr>';
+  ks.forEach(function(k){var f=fld(k)||{},v=fm[k];
+    h+='<tr><td>'+esc(k)+'</td><td>'+esc(f.name||"")+'</td><td>'+esc(f.area||"")+'</td><td class="num">'+(f.size!=null?f.size:"")+'</td>'
+      +gcols.map(function(g){return '<td class="num">'+(v.g[g]||"")+'</td>';}).join("")
+      +'<td class="num"><b>'+v.c+'</b></td><td class="num">'+r1(v.kg).toLocaleString()+'</td><td class="num">'+(f.size?r1(v.kg/f.size):"")+'</td></tr>';});
+  $("#aF").innerHTML=h;
+
+  var dm={};
+  S.shipments.forEach(function(s){
+    var k=s.kind==="廃棄・ロス"?("【廃棄】"+(s.lossReason||"理由なし")):(s.dest||"（未記入）");
+    dm[k]=dm[k]||{c:0,kg:0,amt:0,n:0};dm[k].c+=s.count;dm[k].kg+=s.kg;dm[k].amt+=s.amount||0;dm[k].n++;});
+  var h2='<tr><th>出荷先 / 廃棄理由</th><th class="num">件数</th><th class="num">カゴ</th><th class="num">kg</th><th class="num">金額円</th><th class="num">平均単価</th></tr>';
+  var dk=Object.keys(dm).sort(function(a,b){return dm[b].kg-dm[a].kg;});
+  if(!dk.length) h2+='<tr><td colspan="6" class="muted">出荷記録なし</td></tr>';
+  dk.forEach(function(k){h2+='<tr><td>'+esc(k)+'</td><td class="num">'+dm[k].n+'</td><td class="num">'+dm[k].c+'</td><td class="num">'+r1(dm[k].kg).toLocaleString()+'</td><td class="num">'+dm[k].amt.toLocaleString()+'</td><td class="num">'+(dm[k].kg&&dm[k].amt?r1(dm[k].amt/dm[k].kg):"")+'</td></tr>';});
+  $("#aDest").innerHTML=h2;
+
+  var mm={};
+  S.shipments.forEach(function(s){var k=(s.date||"").slice(0,7);mm[k]=mm[k]||{c:0,kg:0,amt:0,loss:0};
+    mm[k].c+=s.count;mm[k].kg+=s.kg;mm[k].amt+=s.amount||0;if(s.kind==="廃棄・ロス")mm[k].loss+=s.kg;});
+  var h3='<tr><th>年月</th><th class="num">カゴ</th><th class="num">kg</th><th class="num">金額円</th><th class="num">ロスkg</th><th class="num">ロス率</th></tr>';
+  var mk=Object.keys(mm).sort();
+  if(!mk.length) h3+='<tr><td colspan="6" class="muted">出荷記録なし</td></tr>';
+  mk.forEach(function(k){h3+='<tr><td>'+esc(k)+'</td><td class="num">'+mm[k].c+'</td><td class="num">'+r1(mm[k].kg).toLocaleString()+'</td><td class="num">'+mm[k].amt.toLocaleString()+'</td><td class="num">'+r1(mm[k].loss)+'</td><td class="num">'+(mm[k].kg?Math.round(mm[k].loss/mm[k].kg*100):0)+'%</td></tr>';});
+  $("#aMon").innerHTML=h3;
+
+  var fs={};
+  S.shipments.forEach(function(s){s.items.forEach(function(i){
+    fs[i.fieldId]=fs[i.fieldId]||{kg:0,loss:0,amt:0};
+    fs[i.fieldId].kg+=i.kg; if(s.kind==="廃棄・ロス") fs[i.fieldId].loss+=i.kg;
+    if(s.amount&&s.kg) fs[i.fieldId].amt+=s.amount*(i.kg/s.kg);});});
+  var h4='<tr><th>圃場ID</th><th>圃場名</th><th>エリア</th><th class="num">面積a</th><th class="num">出庫kg</th><th class="num">うちロスkg</th><th class="num">ロス率</th><th class="num">金額円</th><th class="num">kg/a</th></tr>';
+  var fk=Object.keys(fs).sort();
+  if(!fk.length) h4+='<tr><td colspan="9" class="muted">出荷記録なし</td></tr>';
+  fk.forEach(function(k){var f=fld(k)||{},v=fs[k];
+    h4+='<tr><td>'+esc(k)+'</td><td>'+esc(f.name||"")+'</td><td>'+esc(f.area||"")+'</td><td class="num">'+(f.size!=null?f.size:"")+'</td>'
+      +'<td class="num">'+r1(v.kg).toLocaleString()+'</td><td class="num">'+r1(v.loss)+'</td><td class="num">'+(v.kg?Math.round(v.loss/v.kg*100):0)+'%</td>'
+      +'<td class="num">'+Math.round(v.amt).toLocaleString()+'</td><td class="num">'+(f.size?r1(v.kg/f.size):"")+'</td></tr>';});
+  $("#aFS").innerHTML=h4;
+}
+
+/* ---------- レイアウト分析 ---------- */
+function aboveCount(p){if(!p.loc)return 0;var w=wh(p.wh),n=0;for(var t=p.loc.t+1;t<=w.tiers;t++) if(palletAt(p.wh,p.loc.r,p.loc.c,t)) n++;return n;}
+function doorDist(p){
+  if(!p.loc) return 0;
+  var w=wh(p.wh); if(!w) return 0;
+  var e=w.doorEdge||'列大';
+  if(e==='列大') return w.cols-p.loc.c;
+  if(e==='列小') return p.loc.c-1;
+  if(e==='行小') return p.loc.r-1;
+  return w.rows-p.loc.r;
+}
+function renderEff(){
+  var cfg=S.config, tc=0,tu=0,tk=0,tcn=0;
+  var h='<table><tr><th>貯蔵庫</th><th class="num">ロケーション</th><th class="num">使用中</th><th class="num">空き</th><th class="num">使用率</th><th class="num">在庫カゴ</th><th class="num">在庫kg</th><th class="num">追加収容可能kg</th></tr>';
+  cfg.warehouses.forEach(function(w){
+    var cap=w.rows*w.cols*w.tiers;
+    var ps=inStock().filter(function(p){return p.wh===w.id&&p.loc;});
+    var cn=ps.reduce(function(a,p){return a+pCount(p);},0), kg=cn*cfg.unitWeightKg, free=cap-ps.length;
+    tc+=cap;tu+=ps.length;tk+=kg;tcn+=cn;
+    h+='<tr><td>'+esc(w.name)+'</td><td class="num">'+cap+'</td><td class="num">'+ps.length+'</td><td class="num">'+free+'</td>'
+      +'<td class="num">'+Math.round(ps.length/cap*100)+'%</td><td class="num">'+cn.toLocaleString()+'</td><td class="num">'+r1(kg).toLocaleString()+'</td>'
+      +'<td class="num">'+(free*cfg.maxPerPallet*cfg.unitWeightKg).toLocaleString()+'</td></tr>';
+  });
+  h+='<tr style="background:#f5f3f0"><td><b>合計</b></td><td class="num"><b>'+tc+'</b></td><td class="num"><b>'+tu+'</b></td><td class="num"><b>'+(tc-tu)+'</b></td>'
+    +'<td class="num"><b>'+(tc?Math.round(tu/tc*100):0)+'%</b></td><td class="num"><b>'+tcn.toLocaleString()+'</b></td><td class="num"><b>'+r1(tk).toLocaleString()+'</b></td>'
+    +'<td class="num"><b>'+((tc-tu)*cfg.maxPerPallet*cfg.unitWeightKg).toLocaleString()+'</b></td></tr></table>';
+  var theoretical=tc*cfg.maxPerPallet*cfg.unitWeightKg;
+  var fillLoss=tu?Math.round((1-tcn/(tu*cfg.maxPerPallet))*100):0;
+  h+='<p class="muted" style="margin:8px 0 0">満載時の理論容量：<b>'+theoretical.toLocaleString()+'kg</b>（'+(tc*cfg.maxPerPallet).toLocaleString()+'カゴ）。'
+    +'使用中パレットの平均充填率 '+(100-fillLoss)+'%'+(fillLoss>15?' — 端数をまとめると '+Math.round(tu*fillLoss/100)+' 枠ほど空けられる可能性があります。':'。')+'</p>';
+  $("#eCap").innerHTML=h;
+  $("#eDoorTxt").textContent=cfg.door==="max"?"列番号が大きい側":"列番号が小さい側";
+
+  var ps=inStock().filter(function(p){return p.loc;});
+  $("#eAccess").innerHTML='<div class="stat"><div><span>積み替えなしで出せる</span><b>'+ps.filter(function(p){return aboveCount(p)===0;}).length+' / '+ps.length+'</b></div>'
+    +'<div><span>1枚どかせば出せる</span><b>'+ps.filter(function(p){return aboveCount(p)===1;}).length+'</b></div>'
+    +'<div><span>2枚以上どかす</span><b>'+ps.filter(function(p){return aboveCount(p)>=2;}).length+'</b></div>'
+    +'<div><span>入口から平均</span><b>'+(ps.length?r1(ps.reduce(function(a,p){return a+doorDist(p);},0)/ps.length):0)+' 列</b></div></div>';
+
+  var sorted=ps.slice().sort(function(a,b){return String(pOldestHarvest(a)||"9999").localeCompare(String(pOldestHarvest(b)||"9999"));});
+  var h3='<tr><th class="num">古い順</th><th>番号</th><th>収穫日</th><th class="num">貯蔵日数</th><th>場所</th><th>品種</th><th class="num">カゴ</th><th class="num">上の枚数</th><th class="num">入口距離</th><th class="num">取出コスト</th></tr>';
+  if(!sorted.length) h3+='<tr><td colspan="10" class="muted">在庫なし</td></tr>';
+  sorted.slice(0,40).forEach(function(p,i){
+    var ab=aboveCount(p),dd=doorDist(p),cost=ab*3+dd, bad=i<10&&cost>=6;
+    var dv=daysBetween(pOldestHarvest(p),today());
+    h3+='<tr style="cursor:pointer'+(bad?';background:#fdf0ea':'')+'" data-p="'+p.id+'"><td class="num">'+(i+1)+'</td><td><b>'+esc(p.id)+'</b></td>'
+      +'<td>'+esc(pOldestHarvest(p)||"")+'</td><td class="num">'+(dv==null?"":dv)+'</td>'
+      +'<td>'+esc(locStr(p))+'</td><td>'+esc(pVarieties(p).join(","))+'</td><td class="num">'+pCount(p)+'</td>'
+      +'<td class="num">'+ab+'</td><td class="num">'+dd+'</td><td class="num"><b>'+cost+'</b></td></tr>';});
+  $("#eFifo").innerHTML=h3;
+  $$("#eFifo tr[data-p]").forEach(function(el){el.onclick=function(){openPallet(el.dataset.p);};});
+
+  var lot={};
+  ps.forEach(function(p){
+    var k=(pVarieties(p)[0]||"未設定")+" / "+(pOldestHarvest(p)||"収穫日なし");
+    lot[k]=lot[k]||{n:0,bays:{},cnt:0,whs:{}};
+    lot[k].n++; lot[k].cnt+=pCount(p);
+    lot[k].bays[p.wh+"-"+p.loc.r+"-"+p.loc.c]=1; lot[k].whs[p.wh]=1;});
+  var h4='<tr><th>ロット（品種 / 収穫日）</th><th class="num">パレット</th><th class="num">カゴ</th><th class="num">番地数</th><th class="num">庫数</th><th>まとまり</th></tr>';
+  var lk=Object.keys(lot).sort(function(a,b){return lot[b].n-lot[a].n;});
+  if(!lk.length) h4+='<tr><td colspan="6" class="muted">在庫なし</td></tr>';
+  lk.forEach(function(k){
+    var v=lot[k], bays=Object.keys(v.bays).length, ideal=Math.ceil(v.n/3), spread=bays/ideal;
+    var tag=spread<=1.2?'<span style="color:var(--ok)">良好</span>':spread<=2?'<span style="color:var(--warn)">やや分散</span>':'<span style="color:var(--danger)">分散</span>';
+    h4+='<tr><td>'+esc(k)+'</td><td class="num">'+v.n+'</td><td class="num">'+v.cnt+'</td><td class="num">'+bays+'</td><td class="num">'+Object.keys(v.whs).length+'</td><td>'+tag+'（理想 '+ideal+'番地）</td></tr>';});
+  $("#eLot").innerHTML=h4;
+}
+
+/* ---------- 履歴 ---------- */
+function renderLog(){
+  var ty=$("#lType").value,f=$("#lFrom").value,t=$("#lTo").value,q=$("#lQ").value.trim();
+  var rows=S.log.filter(function(x){
+    return (!ty||x.type===ty)&&(!f||x.ts.slice(0,10)>=f)&&(!t||x.ts.slice(0,10)<=t)&&(!q||JSON.stringify(x).indexOf(q)>=0);
+  }).slice().reverse();
+  var h='<tr><th>日時</th><th>種別</th><th>パレット</th><th>移動元</th><th>移動先</th><th>内容</th><th>担当</th></tr>';
+  if(!rows.length) h+='<tr><td colspan="7" class="muted">該当なし</td></tr>';
+  rows.slice(0,1500).forEach(function(x){
+    h+='<tr><td>'+esc(x.ts)+'</td><td>'+esc(x.type)+'</td><td style="color:var(--accent);cursor:pointer" data-p="'+esc(x.palletId)+'">'+esc(x.palletId)+'</td><td>'+esc(x.from)+'</td><td>'+esc(x.to)+'</td><td>'+esc(x.detail)+'</td><td>'+esc(x.user)+'</td></tr>';});
+  $("#lTbl").innerHTML=h;
+  $$("#lTbl td[data-p]").forEach(function(el){el.onclick=function(){if(pById(el.dataset.p))openPallet(el.dataset.p);};});
+}
+
+/* ---------- 圃場マスタ ---------- */
+function renderFields(){
+  var only=$("#fFilter").value==="1";
+  var list=S.fields.filter(function(f){return !only||f.active;});
+  var h='<tr><th>圃場ID</th><th>圃場名</th><th>略称（マップ表示）</th><th>エリア</th><th class="num">面積a</th><th>担当</th><th>有効</th><th>形態</th><th>今期作物</th></tr>';
+  if(!list.length) h+='<tr><td colspan="9" class="muted">圃場データがありません。「設定」シートの圃場マスタURLを確認してください。</td></tr>';
+  list.forEach(function(f){h+='<tr><td>'+esc(f.id)+'</td><td>'+esc(f.name)+'</td>'
+    +'<td><b>'+esc(f.short||f.name)+'</b>'+(f.short?'':' <span class="muted">（圃場名のまま）</span>')+'</td>'
+    +'<td>'+esc(f.area)+'</td><td class="num">'+(f.size!=null?f.size:"")+'</td><td>'+esc(f.owner)+'</td><td>'+(f.active?"○":"×")+'</td><td>'+esc(f.type)+'</td><td>'+esc(f.crop)+'</td></tr>';});
+  $("#fTbl").innerHTML=h;
+  var by={}; S.fields.filter(function(f){return f.active;}).forEach(function(f){by[f.area]=(by[f.area]||0)+1;});
+  $("#fCount").textContent="有効 "+S.fields.filter(function(f){return f.active;}).length+"件 ／ "+AREA_ORDER.filter(function(a){return by[a];}).map(function(a){return a+" "+by[a];}).join("・");
+  $("#fSrc").textContent="取得元： "+(S.fieldSource||"");
+}
+
+/* ---------- CSV ---------- */
+function toCsv(rows){
+  return rows.map(function(r){return r.map(function(c){
+    var s=String(c==null?"":c);
+    return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;
+  }).join(",");}).join("\r\n");
+}
+function dl(name,rows){
+  toast("CSVを作成しています…");
+  call("saveCsvToDrive",name,toCsv(rows)).then(function(r){
+    var a=$("#dlLink"); a.href=r.url; a.textContent=r.name;
+    $("#dlModal").classList.add("open");
+  }).catch(function(e){ toast("CSV作成エラー: "+(e&&e.message?e.message:e)); });
+}
+function csvStock(){
+  var rows=[["パレット番号","状態","貯蔵庫","行","列","段","場所","等級","入庫日","収穫日","貯蔵日数","圃場ID","圃場名","エリア","面積a","品種","カゴ数","kg","洗浄","メモ"]];
+  S.pallets.forEach(function(p){p.lines.forEach(function(l){var f=fld(l.fieldId)||{};
+    rows.push([p.id,p.status,(wh(p.wh)||{}).name||"",p.loc?rowL(p.loc.r):"",p.loc?p.loc.c:"",p.loc?p.loc.t:"",locStr(p),
+      p.grade||"未選別",p.inAt||"",l.harvestAt||"",daysBetween(l.harvestAt,today())||"",l.fieldId,f.name||"",f.area||"",
+      f.size!=null?f.size:"",l.variety||"",l.count,r1(l.count*S.config.unitWeightKg),p.washed||"",p.note||""]);});});
+  dl("在庫一覧",rows);
+}
+function csvShip(){
+  var rows=[["出庫ID","日付","区分","パレット番号","貯蔵庫","場所","等級","圃場ID","圃場名","エリア","品種","収穫日","カゴ数","kg","出荷先","廃棄理由","単価","按分金額","担当","メモ","取消"]];
+  shipFiltered().forEach(function(s){s.items.forEach(function(i){var f=fld(i.fieldId)||{};
+    rows.push([s.id,s.date,s.kind,s.palletId,(wh(s.wh)||{}).name||"",s.loc,s.grade||"未選別",i.fieldId,f.name||"",f.area||"",
+      i.variety||"",i.harvestAt||"",i.count,r1(i.kg),s.dest||"",s.lossReason||"",s.unitPrice||"",
+      s.amount&&s.kg?Math.round(s.amount*(i.kg/s.kg)):"",s.user,s.note,s.canceled?"取消":""]);});});
+  dl("出荷記録",rows);
+}
+function csvLog(){
+  var rows=[["日時","種別","パレット番号","移動元","移動先","内容","担当"]];
+  S.log.forEach(function(x){rows.push([x.ts,x.type,x.palletId,x.from,x.to,x.detail,x.user]);});
+  dl("履歴",rows);
+}
+function csvAgg(){
+  var we=document.getElementById("aWash");
+  var wlbl=we&&we.value==="w"?"（洗浄済のみ）":we&&we.value==="d"?"（土付きのみ）":"";
+  var r=stockRows(), rows=[["【現在庫"+wlbl+"】等級","エリア","カゴ","kg"]], m={};
+  r.forEach(function(x){var k=x.grade+"|"+x.area;m[k]=m[k]||{c:0,kg:0};m[k].c+=x.count;m[k].kg+=x.kg;});
+  Object.keys(m).sort().forEach(function(k){var a=k.split("|");rows.push([a[0],a[1],m[k].c,r1(m[k].kg)]);});
+  rows.push([]); rows.push(["【現在庫】圃場ID","圃場名","エリア","面積a","品種","カゴ","kg"]);
+  var fm={}; r.forEach(function(x){var k=x.fieldId+"|"+x.variety;fm[k]=fm[k]||{c:0,kg:0};fm[k].c+=x.count;fm[k].kg+=x.kg;});
+  Object.keys(fm).sort().forEach(function(k){var a=k.split("|"),f=fld(a[0])||{};rows.push([a[0],f.name||"",f.area||"",f.size!=null?f.size:"",a[1],fm[k].c,r1(fm[k].kg)]);});
+  rows.push([]); rows.push(["【出荷】出荷先/理由","件数","カゴ","kg","金額"]);
+  var dm={}; S.shipments.forEach(function(s){var k=s.kind==="廃棄・ロス"?("廃棄:"+(s.lossReason||"")):(s.dest||"未記入");
+    dm[k]=dm[k]||{n:0,c:0,kg:0,amt:0};dm[k].n++;dm[k].c+=s.count;dm[k].kg+=s.kg;dm[k].amt+=s.amount||0;});
+  Object.keys(dm).sort().forEach(function(k){rows.push([k,dm[k].n,dm[k].c,r1(dm[k].kg),dm[k].amt]);});
+  dl("集計",rows);
+}
+function csvFields(){
+  var rows=[["圃場ID","圃場名","エリア","面積_a","担当者","備考","有効","栽培形態","今期作物"]];
+  S.fields.forEach(function(f){rows.push([f.id,f.name,f.areaRaw||f.area,f.size!=null?f.size:"",f.owner,f.note,f.active?"TRUE":"FALSE",f.type,f.crop]);});
+  dl("圃場マスタ",rows);
+}
+
+/* ---------- 設定 ---------- */
+function renderConf(){
+  var c=S.config;
+  var eo=function(v){var o=[['列大','列番号が大きい側'],['列小','列番号が小さい側'],['行小','行Aの側'],['行大','行Fの側']];
+    return o.map(function(x){return '<option value="'+x[0]+'"'+(v===x[0]?' selected':'')+'>'+x[1]+'</option>';}).join("");};
+  var h='<div style="overflow:auto"><table><tr><th>貯蔵庫名</th><th class="num">横列（行）</th><th class="num">縦列（列）</th><th class="num">段</th><th class="num">パレット枠</th><th>入口のある辺</th><th>入口の位置</th></tr>';
+  c.warehouses.forEach(function(w,i){
+    h+='<tr><td><input type="text" value="'+esc(w.name)+'" data-w="'+i+'" data-k="name" style="width:130px"></td>'
+      +'<td class="num"><input type="number" min="1" max="12" value="'+w.rows+'" data-w="'+i+'" data-k="rows" style="width:64px;text-align:right"></td>'
+      +'<td class="num"><input type="number" min="1" max="30" value="'+w.cols+'" data-w="'+i+'" data-k="cols" style="width:64px;text-align:right"></td>'
+      +'<td class="num"><input type="number" min="1" max="6" value="'+w.tiers+'" data-w="'+i+'" data-k="tiers" style="width:64px;text-align:right"></td>'
+      +'<td class="num">'+(w.rows*w.cols*w.tiers)+'</td>'
+      +'<td><select data-w="'+i+'" data-k="doorEdge">'+eo(w.doorEdge||'列大')+'</select></td>'
+      +'<td><input type="text" value="'+esc(w.doorPos||'C-D')+'" data-w="'+i+'" data-k="doorPos" style="width:74px" placeholder="D-E"></td></tr>';});
+  h+='</table></div>';
+  $("#cWh").innerHTML=h;
+  $("#cMax").value=c.maxPerPallet; $("#cUW").value=c.unitWeightKg;
+  $("#cVar").value=c.varieties.join(","); $("#cDest").value=c.destinations.join(","); $("#cLoss").value=c.lossReasons.join(",");
+}
+
+/* ---------- セレクタ ---------- */
+function refreshIField(){
+  var a=$("#iArea").value;
+  var list=S.fields.filter(function(f){return f.active&&(!a||f.area===a);});
+  $("#iField").innerHTML=list.map(function(f){return '<option value="'+esc(f.id)+'">'+esc(f.id+" "+f.name)+(f.crop&&f.crop!=="さつまいも"?"（"+esc(f.crop)+"）":"")+'</option>';}).join("")||'<option value="">該当なし</option>';
+}
+function buildLocSelects(){ fillLoc("#iRow","#iCol","#iTier",Number($("#iWh").value)); }
+function refreshSelects(){
+  var areas=AREA_ORDER.filter(function(a){return S.fields.some(function(f){return f.active&&f.area===a;});});
+  var keep={}; ["#sWh","#sGrade","#sVar","#sArea","#mHi","#lType","#iArea","#iVar","#iGrade","#iWh","#dGrade","#dnVar"].forEach(function(s){var e=$(s);if(e)keep[s]=e.value;});
+  var gOpts='<option value="">未選別</option>'+GRADES.map(function(g){return '<option>'+g+'</option>';}).join("");
+  $("#iGrade").innerHTML=gOpts; $("#dGrade").innerHTML=gOpts;
+  $("#iWh").innerHTML=S.config.warehouses.map(function(w){return '<option value="'+w.id+'">'+esc(w.name)+'</option>';}).join("");
+  $("#sWh").innerHTML='<option value="">すべて</option>'+S.config.warehouses.map(function(w){return '<option value="'+w.id+'">'+esc(w.name)+'</option>';}).join("");
+  $("#sGrade").innerHTML='<option value="">すべて</option>'+GRADES.map(function(g){return '<option>'+g+'</option>';}).join("")+'<option value="__none__">未選別</option>';
+  var vOpts=S.config.varieties.map(function(v){return '<option>'+esc(v)+'</option>';}).join("");
+  $("#iVar").innerHTML=vOpts; $("#dnVar").innerHTML=vOpts;
+  $("#sVar").innerHTML='<option value="">すべて</option>'+vOpts;
+  $("#iArea").innerHTML='<option value="">全エリア</option>'+areas.map(function(a){return '<option>'+esc(a)+'</option>';}).join("");
+  $("#sArea").innerHTML='<option value="">すべて</option>'+areas.map(function(a){return '<option>'+esc(a)+'</option>';}).join("");
+  $("#mHi").innerHTML='<option value="">なし</option>'
+    +'<optgroup label="状態"><option value="W:d30">土付きで30日経過（洗浄OK）</option><option value="W:washed">洗浄済 💧</option><option value="W:dirty">土付き（未洗浄）</option></optgroup>'
+    +'<optgroup label="等級">'+GRADES.map(function(g){return '<option value="G:'+g+'">'+g+'</option>';}).join("")+'</optgroup>'
+    +'<optgroup label="品種">'+S.config.varieties.map(function(v){return '<option value="V:'+esc(v)+'">'+esc(v)+'</option>';}).join("")+'</optgroup>'
+    +'<optgroup label="エリア">'+areas.map(function(a){return '<option value="A:'+esc(a)+'">'+esc(a)+'</option>';}).join("")+'</optgroup>';
+  $("#lType").innerHTML='<option value="">すべて</option>'+uniq(S.log.map(function(x){return x.type;})).map(function(t){return '<option>'+esc(t)+'</option>';}).join("");
+  $("#dnField").innerHTML=S.fields.filter(function(f){return f.active;}).map(function(f){return '<option value="'+esc(f.id)+'">'+esc(f.id+" "+f.name)+'</option>';}).join("");
+  $("#dlDest").innerHTML=S.config.destinations.map(function(d){return '<option value="'+esc(d)+'">';}).join("");
+  $("#dlLoss").innerHTML=S.config.lossReasons.map(function(d){return '<option value="'+esc(d)+'">';}).join("");
+  Object.keys(keep).forEach(function(s){var e=$(s);if(!e||keep[s]===undefined)return;
+    for(var i=0;i<e.options.length;i++) if(e.options[i].value===keep[s]){e.value=keep[s];break;}});
+  refreshIField(); buildLocSelects();
+}
+
+/* ---------- KPI / 全体 ---------- */
+function renderKPI(){
+  var inv=inStock();
+  var cn=inv.reduce(function(a,p){return a+pCount(p);},0);
+  var cap=S.config.warehouses.reduce(function(a,w){return a+w.rows*w.cols*w.tiers;},0);
+  var used=inv.filter(function(p){return p.loc;}).length;
+  $("#kPal").textContent=inv.length;
+  $("#kCon").textContent=cn.toLocaleString();
+  $("#kKg").textContent=Math.round(cn*S.config.unitWeightKg).toLocaleString();
+  $("#kRate").textContent=cap?Math.round(used/cap*100)+"%":"—";
+  $("#kShip").textContent=Math.round(S.shipments.filter(function(s){return !s.canceled&&s.kind!=="廃棄・ロス"&&s.kind!=="洗浄";}).reduce(function(a,s){return a+s.kg;},0)).toLocaleString();
+  var wc=washing().reduce(function(a,p){return a+pCount(p);},0);
+  var ww=$("#kWashWrap"); if(ww){ ww.style.display=wc>0?"":"none"; $("#kWash").textContent=r2(wc).toLocaleString(); }
+  $("#whoami").textContent="操作者: "+(S.me||"不明")+" ／ データ: このスプレッドシート（全員共有）";
+}
+var TABR={in:renderRecent, out:renderShipTab, stock:renderStock, agg:renderAgg,
+          eff:renderEff, log:renderLog, conf:function(){renderFields();renderConf();}};
+var TABDIRTY={};
+function curTab(){
+  var b=document.querySelector("nav button.active");
+  return b?b.dataset.tab:"map";
+}
+function renderTab(name){
+  if(TABR[name]){ TABR[name](); TABDIRTY[name]=false; }
+  if(name==="in") renderIntake();
+}
+function renderAll(){
+  refreshSelects(); renderKPI(); renderMaps();
+  Object.keys(TABR).forEach(function(k){ TABDIRTY[k]=true; });
+  renderTab(curTab());
+  if(UI.sel && pById(UI.sel) && $("#drawer").classList.contains("open")) openPallet(UI.sel);
+}
+function switchTab(name){
+  $$("nav button").forEach(function(b){b.classList.toggle("active",b.dataset.tab===name);});
+  $$(".tab").forEach(function(t){t.classList.toggle("active",t.id==="tab-"+name);});
+  if(TABDIRTY[name]!==false) renderTab(name);
+  var f=document.getElementById("fabMove");
+  if(f) f.classList.toggle("show", name==="map");
+  if(name!=="map" && UI.dragMode) setDragMode(false);
+  window.scrollTo(0,0);
+}
+
+/* ---------- 他ユーザー更新の検知 ---------- */
+var _rsz=null;
+window.addEventListener("resize",function(){
+  clearTimeout(_rsz);
+  _rsz=setTimeout(function(){ if(MAP_SIZE==="fit") fitMap(); },200);
+});
+window.addEventListener("orientationchange",function(){ setTimeout(function(){ if(MAP_SIZE==="fit") renderMaps(); },350); });
+function startPolling(){
+  setInterval(function(){
+    if(document.hidden||UI.busy>0) return;
+    call("getStamp").then(function(s){
+      if(UI.stamp && s!==UI.stamp) document.getElementById("syncbar").classList.add("on");
+    }).catch(function(){});
+  },45000);
+}
+
+/* ---------- バインド ---------- */
+function bind(){
+  $$("nav button").forEach(function(b){b.onclick=function(){switchTab(b.dataset.tab);};});
+  $("#btnDrag").onclick=function(){ setDragMode(!UI.dragMode); };
+  $("#fabMove").onclick=function(){ setDragMode(!UI.dragMode); };
+  $("#mColor").onchange=function(){renderMaps();savePrefs();};
+  $("#mHi").onchange=renderMaps;
+  $("#mShow").onchange=function(){renderMaps();savePrefs();};
+  $("#btnGoIn").onclick=function(){goIntake(null);};
+  $("#btnReload").onclick=function(){reload().then(function(){toast("最新にしました");});};
+  $("#btnSync").onclick=function(){reload().then(function(){toast("最新にしました");});};
+
+  $("#iHarvest").value=today();
+  $("#iArea").onchange=function(){refreshIField();updateSuggest();};
+  $("#iWh").onchange=function(){buildLocSelects();updateSuggest();};
+  $("#iPlace").onchange=renderIntake;
+  $("#iHarvest").onchange=renderIntake;
+  $("#iVar").onchange=updateSuggest;
+  $("#iAdd").onclick=function(){
+    var fid=$("#iField").value; if(!fid){toast("圃場を選んでください");return;}
+    var c=Number($("#iCount").value)||0; if(c<=0){toast("カゴ数を入れてください");return;}
+    intakeLines.push({harvestAt:$("#iHarvest").value||today(),fieldId:fid,variety:$("#iVar").value,count:c});
+    var tot=intakeLines.reduce(function(a,l){return a+l.count;},0);
+    $("#iCount").value=Math.max(0,r2(S.config.maxPerPallet-tot));
+    renderIntake();
+  };
+  $("#iSave").onclick=function(){doIntake(false);};
+  $("#iSaveNext").onclick=function(){doIntake(true);};
+  $("#iClear").onclick=function(){intakeLines=[];$("#iNote").value="";renderIntake();};
+
+  $("#dClose").onclick=closeDrawer;
+  $("#dSave").onclick=function(){
+    var p=pById(UI.sel); if(!p) return;
+    var lines=p.lines.filter(function(l){return Number(l.count)>0;});
+    mutate("updatePallet",{id:p.id,grade:$("#dGrade").value,inAt:$("#dIn").value,note:$("#dNote").value,lines:lines})
+      .then(function(){ var q=pById(p.id); if(q&&q.status==="在庫") openPallet(p.id); else closeDrawer(); toast("保存しました"); });
+  };
+  $("#dMove").onclick=openMove;
+  $("#dShip").onclick=openShip;
+  $("#dnAdd").onclick=function(){
+    var p=pById(UI.sel); if(!p) return;
+    var fid=$("#dnField").value, c=Number($("#dnCount").value)||0;
+    if(!fid||c<=0){toast("圃場とカゴ数を入れてください");return;}
+    p.lines.push({harvestAt:$("#dnHarvest").value||p.inAt||today(),fieldId:fid,variety:$("#dnVar").value,count:c});
+    renderDLines(p); $("#dCnt").textContent=pCount(p); $("#dKg").textContent=r1(pKg(p)).toLocaleString();
+  };
+  $("#dDel").onclick=function(){
+    var p=pById(UI.sel); if(!p) return;
+    ask("パレット "+p.id+" を削除します。\n\n中身 "+pCount(p)+"カゴ（"+r1(pKg(p))+"kg）の記録も一緒に消えます。\n履歴には削除した記録が残ります。","パレットの削除","削除する")
+      .then(function(yes){
+        if(!yes) return;
+        mutate("deletePallet",p.id).then(function(){closeDrawer();toast("削除しました");});
+      });
+  };
+
+  $("#mvWh").onchange=function(){fillLoc("#mvRow","#mvCol","#mvTier",Number(this.value));mvCheck();};
+  ["#mvRow","#mvCol","#mvTier"].forEach(function(s){$(s).onchange=mvCheck;});
+  $("#mvOk").onclick=doMove;
+  $("#mvNo").onclick=function(){$("#mvModal").classList.remove("open");};
+
+  $("#spKind").onchange=spKindChange;
+  $("#spPrice").oninput=spCalc;
+  $("#spAll").onclick=function(){var p=pById(UI.sel);if(p)renderShipLines(p,true);};
+  $("#spZero").onclick=function(){var p=pById(UI.sel);if(p)renderShipLines(p,false);};
+  $("#spOk").onclick=doShip;
+  $("#spNo").onclick=function(){$("#spModal").classList.remove("open");};
+  $("#dlNo").onclick=function(){$("#dlModal").classList.remove("open");};
+
+  ["#oFrom","#oTo","#oKind"].forEach(function(s){$(s).onchange=renderShipTab;}); $("#oQ").oninput=renderShipTab;
+  $("#wmOk").onclick=doWashReturn; $("#wmNo").onclick=function(){$("#wmModal").classList.remove("open");};
+  ["#sWh","#sGrade","#sVar","#sArea","#sSort","#sWash"].forEach(function(s){$(s).onchange=renderStock;}); $("#sQ").oninput=renderStock;
+  var aw=$("#aWash"); if(aw) aw.onchange=renderAgg;
+  ["#lType","#lFrom","#lTo"].forEach(function(s){$(s).onchange=renderLog;}); $("#lQ").oninput=renderLog;
+  $("#fFilter").onchange=renderFields;
+  $("#oCsv").onclick=csvShip; $("#sCsv").onclick=csvStock; $("#aCsv").onclick=csvAgg; $("#lCsv").onclick=csvLog; $("#fOut").onclick=csvFields;
+  $("#fReload").onclick=function(){toast("圃場マスタを読み込んでいます…");mutate("reloadFields").then(function(){toast("圃場マスタを更新しました");});};
+
+  $("#cSave").onclick=function(){
+    var cfg=JSON.parse(JSON.stringify(S.config));
+    $$("#cWh input, #cWh select").forEach(function(el){
+      var w=cfg.warehouses[+el.dataset.w], k=el.dataset.k;
+      if(k==="name") w.name=el.value||w.name;
+      else if(k==="doorEdge") w.doorEdge=el.value;
+      else if(k==="doorPos") w.doorPos=el.value||"C-D";
+      else w[k]=Math.max(1,Number(el.value)||1);
+    });
+    cfg.door=(cfg.warehouses[0].doorEdge==="列小")?"min":"max";
+    cfg.maxPerPallet=Math.max(1,Number($("#cMax").value)||24);
+    cfg.unitWeightKg=Number($("#cUW").value)||18;
+    var sp=function(s){return s.split(/[,、]/).map(function(x){return x.trim();}).filter(Boolean);};
+    cfg.varieties=sp($("#cVar").value); cfg.destinations=sp($("#cDest").value); cfg.lossReasons=sp($("#cLoss").value);
+    mutate("saveConf",cfg).then(function(){toast("設定を保存しました（全員に反映されます）");});
+  };
+
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){closeDrawer();$("#mvModal").classList.remove("open");$("#spModal").classList.remove("open");$("#dlModal").classList.remove("open");}
+  });
+}
+
+/* ---------- 合言葉ログイン ---------- */
+function showLogin(){
+  if(document.getElementById("login")) return;
+  var d=document.createElement("div");
+  d.id="login";
+  d.style.cssText="position:fixed;inset:0;background:var(--bg,#f4f5f2);z-index:9999;display:flex;align-items:center;justify-content:center";
+  d.innerHTML='<div style="background:#fff;border:1px solid #dcd7cf;border-radius:12px;padding:28px 26px;width:min(340px,90%);text-align:center">'
+    +'<div style="font-size:17px;font-weight:700;margin-bottom:4px">さつまいも貯蔵庫 在庫管理</div>'
+    +'<div style="font-size:12px;color:#7c756c;margin-bottom:16px">合言葉を入力してください</div>'
+    +'<input type="password" id="lgKey" style="width:100%;padding:11px;border:1px solid #dcd7cf;border-radius:7px;font-size:16px;text-align:center" autocomplete="current-password">'
+    +'<div id="lgMsg" style="font-size:12px;color:#b03a2e;min-height:18px;margin:8px 0 4px"></div>'
+    +'<button class="btn" id="lgGo" style="width:100%;padding:12px;font-size:15px">はいる</button></div>';
+  document.body.appendChild(d);
+  var go=function(){
+    var v=document.getElementById("lgKey").value.trim();
+    if(!v) return;
+    API_KEY=v;
+    document.getElementById("lgMsg").textContent="確認中…";
+    call("getStamp").then(function(){
+      try{ localStorage.setItem("CHZ_KEY",v); }catch(e){}
+      var el=document.getElementById("login"); if(el) el.parentNode.removeChild(el);
+      if(window.__appStarted) location.reload(); else startApp();
+    }).catch(function(){
+      API_KEY="";
+      document.getElementById("lgMsg").textContent="合言葉が違います";
+    });
+  };
+  document.getElementById("lgGo").onclick=go;
+  document.getElementById("lgKey").addEventListener("keydown",function(e){ if(e.key==="Enter") go(); });
+  var b=document.getElementById("boot"); if(b) b.style.display="none";
+  setTimeout(function(){ document.getElementById("lgKey").focus(); },50);
+}
+
+/* ---------- 起動 ---------- */
+function startApp(){
+  window.__appStarted=1;
+  bind();
+  var f0=document.getElementById("fabMove"); if(f0) f0.classList.add("show");
+  var cached=null;
+  try{ cached=JSON.parse(localStorage.getItem("SNAP_V1")||"null"); }catch(e){ cached=null; }
+  if(cached && cached.pallets && cached.config){
+    try{
+      S=cached; UI.stamp=null;
+      renderAll();
+      document.getElementById("boot").style.display="none";
+      toast("前回のデータを表示中 — 最新を取得しています…");
+    }catch(e){ S=null; cached=null; }
+  }
+  call("getStateFresh").then(function(st){
+    applyState(st,true);
+    document.getElementById("boot").style.display="none";
+    startPolling();
+    if(cached) toast("最新のデータに更新しました");
+  }).catch(function(e){
+    if(cached){
+      toast("最新の取得に失敗しました（前回のデータを表示中）");
+      startPolling();
+      return;
+    }
+    document.getElementById("boot").innerHTML=
+      '<div class="errbox" style="max-width:520px">読み込みに失敗しました。<br><br>'+esc(e&&e.message?e.message:e)
+      +'<br><br>通信環境をご確認のうえ、再読み込みしてください。</div>';
+  });
+}
+(function gate(){
+  if(API_KEY) startApp();
+  else showLogin();
+})();
+</script>
+
+<style>
+/* ===== 図面スタイル＋縦表示パッチ ===== */
+.mapwrap{padding:0;border:1px solid var(--line);border-radius:0 0 8px 8px;-webkit-overflow-scrolling:touch;
+  background:repeating-linear-gradient(0deg,#f4f1ea 0 26px,#ebe6db 26px 27px),repeating-linear-gradient(90deg,#f4f1ea 0 26px,#ebe6db 26px 27px)}
+.planbox{padding:10px 14px 14px}
+.dimtop{display:flex;align-items:center;gap:6px;font-size:10px;color:#8b8579;margin:0 0 3px 30px;letter-spacing:.05em}
+.dimtop .ln{flex:1;height:1px;background:#b7afa3;position:relative}
+.dimtop .ln:before,.dimtop .ln:after{content:"";position:absolute;top:-3px;width:1px;height:7px;background:#b7afa3}
+.dimtop .ln:before{left:0}.dimtop .ln:after{right:0}
+.planrow{display:flex;align-items:stretch;gap:6px}
+.dimleft{writing-mode:vertical-rl;font-size:10px;color:#8b8579;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;border-left:1px solid #b7afa3;padding-left:4px;margin:14px 0 0 0}
+.planwall{border:3px solid #4a453d;background:transparent;display:inline-block;padding:2px;overflow:auto;border-radius:2px}
+.maptable{border-collapse:collapse;border-spacing:0;margin:0}
+.maptable th{background:rgba(255,255,255,.7);border:none;border-radius:3px;color:#7d766a;font-size:10px;font-weight:600;padding:2px 5px;text-align:center}
+.maptable td{border:none;padding:2px;vertical-align:top}
+:root{--bay-w:104px;--slot-h:44px;--slot-fs:12px}
+body.map-s{--bay-w:80px;--slot-h:34px;--slot-fs:11px}
+body.map-l{--bay-w:136px;--slot-h:54px;--slot-fs:14px}
+.bay{width:var(--bay-w);height:calc(var(--slot-h)*3);background:rgba(255,255,255,.35);border:1.5px dashed #cbc5bb;border-radius:4px;padding:0;gap:0;display:flex;flex-direction:column;overflow:hidden}
+.bay.hasload{border:1.5px solid #9a8f7d;background:#fff;box-shadow:2px 3px 0 rgba(74,69,61,.22)}
+.slot{height:var(--slot-h);border:none;border-bottom:1px dotted #d5cfc3;border-radius:0;background:transparent;padding:0 4px;font-size:var(--slot-fs);gap:3px;color:#a9a196}
+.bay .slot:last-child{border-bottom:none}
+.slot.filled{background-image:none;background:#fff;color:var(--ink)}
+.slot{flex-direction:column;justify-content:center;align-items:stretch;gap:1px;padding:2px 5px}
+.slot .tno{font-size:calc(var(--slot-fs) - 3px);color:#a8a096;flex:none;width:8px}
+.slot .sl1{display:flex;align-items:center;gap:4px;min-width:0;line-height:1.25}
+.slot .sl2{font-size:calc(var(--slot-fs) - 2px);color:#6f675d;line-height:1.2;white-space:nowrap;overflow:hidden;padding-left:12px;display:flex;gap:4px}
+.slot .sl2>span:first-child{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.slot .sqty2{margin-left:auto;font-weight:700;color:#2b2721;flex:none;font-size:var(--slot-fs)}
+.slot .sname{font-weight:700;color:#2b2721;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.slot .sqty{margin-left:auto;font-weight:700;color:#2b2721;flex:none;padding-left:3px}
+.slot .gb{border-radius:3px;padding:0 5px;font-size:calc(var(--slot-fs) - 1px);font-weight:700;color:#2b2721;flex:none}
+.slot .gb2{border-radius:3px;padding:0 4px;font-size:calc(var(--slot-fs) - 3px);background:rgba(0,0,0,.07);color:#5e574d;flex:none}
+.slot .pid{font-size:var(--slot-fs);font-weight:700;color:#2b2721}
+.maptable th{font-size:calc(var(--slot-fs) - 1px)}
+.slot.sel{outline:2px solid var(--accent);outline-offset:-2px}
+.slot.drop{outline:2px solid var(--ok);outline-offset:-2px;background:#e7f4ea}
+.wallrow td{padding:0;border:none !important;height:24px;vertical-align:top;position:relative;background:none}
+.wallrow td.wseg:before{content:"";position:absolute;left:-2px;right:-2px;top:0;height:6px;background:#4a453d;border-radius:1px}
+.wallrow td.wdoor .darc{position:absolute;left:1px;right:1px;top:0;height:19px;background:repeating-linear-gradient(45deg,#ffe9a8 0 9px,#4a453d 9px 18px);opacity:.85;border-radius:0 0 6px 6px}
+.wallrow td.wdoor .dlbl{position:absolute;top:2px;left:0;right:0;text-align:center;font-size:10px;font-weight:700;color:#2b2721;letter-spacing:.08em;background:rgba(255,255,255,.9);border-radius:3px;margin:0 auto;width:44px;border:1.5px solid #4a453d}
+.wallcol{padding:0 !important;border:none !important;width:24px;position:relative;background:none}
+.wallcol.wseg:before{content:"";position:absolute;top:-2px;bottom:-2px;left:0;width:6px;background:#4a453d;border-radius:1px}
+.wallcol.wr.wseg:before{left:auto;right:0}
+.wallcol.wdoor .darc{position:absolute;top:1px;bottom:1px;left:0;width:19px;background:repeating-linear-gradient(45deg,#ffe9a8 0 9px,#4a453d 9px 18px);opacity:.85;border-radius:0 6px 6px 0}
+.wallcol.wr.wdoor .darc{left:auto;right:0;border-radius:6px 0 0 6px}
+.wallcol.wdoor .dlbl{position:absolute;top:50%;left:2px;transform:translateY(-50%);font-size:9px;color:#6f6961;writing-mode:vertical-rl}
+.planwall.nb-bottom{border-bottom:none}
+.planwall.nb-top{border-top:none}
+.planwall.nb-left{border-left:none}
+.planwall.nb-right{border-right:none}
+.planlegend{font-size:10px;color:#8b8579;margin:6px 0 0 30px;letter-spacing:.03em}
+@media(max-width:640px){body{--bay-w:92px;--slot-h:40px;--slot-fs:11px}}
+</style>
+
+<script>
+var MAP_VERT = true;
+
+function doorRangeJs(pos){
+  var s=String(pos||'').toUpperCase().replace(/[^A-Z0-9]/g,'-').split('-').filter(Boolean);
+  var idx=function(v){ if(/^[A-Z]$/.test(v)) return ROWL.indexOf(v)+1; var n=Number(v); return isNaN(n)?0:n; };
+  var a=idx(s[0]||''), b=idx(s[1]||s[0]||'');
+  if(!a) a=1; if(!b) b=a;
+  return {from:Math.min(a,b), to:Math.max(a,b)};
+}
+var MAP_FLIPX=false, MAP_FLIPY=false, _prefsDone=false, _prefTimer=null;
+function collectPrefs(){
+  return {size:MAP_SIZE, vert:MAP_VERT, flipX:MAP_FLIPX, flipY:MAP_FLIPY,
+          disp:MAP_DISP, show:($("#mShow")?$("#mShow").value:""), color:($("#mColor")?$("#mColor").value:"grade")};
+}
+function savePrefs(){
+  clearTimeout(_prefTimer);
+  _prefTimer=setTimeout(function(){
+    call("saveViewPrefs", collectPrefs()).catch(function(){});
+  },500);
+}
+function applyPrefs(){
+  if(_prefsDone) return false;
+  _prefsDone=true;
+  var p = S && S.viewPrefs;
+  if(!p) return false;
+  if(p.size){ MAP_SIZE=p.size;
+    document.body.classList.toggle("map-s",p.size==="s");
+    document.body.classList.toggle("map-l",p.size==="l"); }
+  if(typeof p.vert==="boolean") MAP_VERT=p.vert;
+  MAP_FLIPX=!!p.flipX; MAP_FLIPY=!!p.flipY;
+  if(p.disp) MAP_DISP=p.disp;
+  if($("#mShow") && p.show!==undefined) $("#mShow").value=p.show;
+  if($("#mColor") && p.color) $("#mColor").value=p.color;
+  return true;
+}
+function seq(n){ var a=[]; for(var i=1;i<=n;i++) a.push(i); return a; }
+
+/* 縦表示は横表示を時計回りに90度回した図。転置（鏡像）にはしない */
+function axesFor(w){
+  var across, down, acrossIsRow;
+  if(MAP_VERT){
+    down = seq(w.cols);
+    across = seq(w.rows).reverse();
+    acrossIsRow = true;
+  }else{
+    down = seq(w.rows);
+    across = seq(w.cols);
+    acrossIsRow = false;
+  }
+  if(MAP_FLIPX) across = across.slice().reverse();
+  if(MAP_FLIPY) down = down.slice().reverse();
+  return {across:across, down:down, acrossIsRow:acrossIsRow};
+}
+function doorPlace(w, ax){
+  var e=(w&&w.doorEdge)||'列大';
+  var isRowAxis=(e==='行小'||e==='行大');
+  var atMax=(e==='列大'||e==='行大');
+  var rowOrder = ax.acrossIsRow ? ax.across : ax.down;
+  var colOrder = ax.acrossIsRow ? ax.down : ax.across;
+  var order = isRowAxis ? rowOrder : colOrder;
+  var isAcross = (order === ax.across);
+  var target = atMax ? Math.max.apply(null,order) : Math.min.apply(null,order);
+  var atEnd = order[order.length-1] === target;
+  var side = isAcross ? (atEnd?'right':'left') : (atEnd?'bottom':'top');
+  var rg=doorRangeJs((w&&w.doorPos)||'C-D');
+  return {side:side, from:rg.from, to:rg.to, other:(isAcross?ax.down:ax.across)};
+}
+
+function renderMaps(){
+  var mode=$("#mColor").value, hi=$("#mHi").value, only=$("#mShow").value, h="";
+  ensureOrientToggle();
+
+  S.config.warehouses.forEach(function(w){
+    if(only && String(w.id)!==only) return;
+    var ax = axesFor(w);
+    var dp = doorPlace(w, ax);
+    var sideCol=(dp.side==='left'||dp.side==='right');
+    var cap=w.rows*w.cols*w.tiers;
+    var used=inStock().filter(function(p){return p.wh===w.id&&p.loc;}).length;
+    var acrossM=(ax.across.length*1.1).toFixed(1), downM=(ax.down.length*1.1).toFixed(1);
+    var inDoor=function(v){ return v>=dp.from && v<=dp.to; };
+    var midv=Math.round((dp.from+dp.to)/2);
+
+    var wallRow=function(){
+      var s='<tr class="wallrow"><th></th>';
+      if(sideCol && dp.side==='left') s+='<td></td>';
+      ax.across.forEach(function(v){
+        var on = !sideCol && inDoor(v);
+        s+='<td class="'+(on?'wdoor':'wseg')+'">'+(on?'<span class="darc"></span>'+(v===midv?'<span class="dlbl">入口</span>':''):'')+'</td>';
+      });
+      if(sideCol && dp.side==='right') s+='<td></td>';
+      return s+'</tr>';
+    };
+    var wallCell=function(v){
+      var on=inDoor(v);
+      return '<td class="wallcol '+(dp.side==='right'?'wr ':'')+(on?'wdoor':'wseg')+'">'
+        +(on?'<span class="darc"></span>'+(v===midv?'<span class="dlbl">入口</span>':''):'')+'</td>';
+    };
+
+    h+='<div class="whbox"><div class="whead"><h3 style="background:'+(w.id===1?"var(--w1)":"var(--w2)")+'">'+esc(w.name)+'</h3>'
+      +'<span class="muted">'+used+' / '+cap+' パレット</span>'
+      +'<span class="capbar"><i style="width:'+(cap?used/cap*100:0)+'%"></i></span>'
+      +'<span class="muted">空き '+(cap-used)+'（最大 '+((cap-used)*S.config.maxPerPallet).toLocaleString()+'カゴ）</span></div>'
+      +'<div class="mapwrap"><div class="planbox">'
+      +'<div class="dimtop"><span class="ln"></span><span>'+acrossM+' m</span><span class="ln"></span></div>'
+      +'<div class="planrow"><div class="dimleft">'+downM+' m</div>'
+      +'<div class="planwall nb-'+dp.side+'"><table class="maptable">';
+
+    var hdr='<tr><th></th>';
+    if(sideCol && dp.side==='left') hdr+='<th></th>';
+    ax.across.forEach(function(v){ hdr+='<th>'+(ax.acrossIsRow?rowL(v):("0"+v).slice(-2))+'</th>'; });
+    if(sideCol && dp.side==='right') hdr+='<th></th>';
+    h+=hdr+'</tr>';
+    if(dp.side==='top') h+=wallRow();
+
+    ax.down.forEach(function(dv){
+      h+='<tr><th>'+(ax.acrossIsRow?("0"+dv).slice(-2):rowL(dv))+'</th>';
+      if(sideCol && dp.side==='left') h+=wallCell(dv);
+      ax.across.forEach(function(av){
+        var r = ax.acrossIsRow ? av : dv;
+        var c = ax.acrossIsRow ? dv : av;
+        h+='<td>'+bayHtml(w,r,c,mode,hi)+'</td>';
+      });
+      if(sideCol && dp.side==='right') h+=wallCell(dv);
+      h+='</tr>';
+    });
+    if(dp.side==='bottom') h+=wallRow();
+
+    h+='</table></div></div>'
+      +'<div class="planlegend">1マス＝パレット1.1m×1.1m ／ 1マス内は上から '+w.tiers+'段目→1段目 ／ 網かけは空き</div>'
+      +'</div></div></div>';
+  });
+  $("#maps").innerHTML=h;
+  bindSlots(); renderLegend(mode); renderWashTray();
+  fitMap();
+}
+
+function bayHtml(w,r,c,mode,hi){
+  var load=false;
+  for(var tt=1;tt<=w.tiers;tt++){ if(palletAt(w.id,r,c,tt)){ load=true; break; } }
+  var s='<div class="bay'+(load?' hasload':'')+'">';
+  for(var t=w.tiers;t>=1;t--){
+    var p=palletAt(w.id,r,c,t), key=w.id+","+r+","+c+","+t;
+    if(p){
+      var dim="";
+      if(hi){
+        var ok=false;
+        if(hi.indexOf("G:")===0) ok=(p.grade||"")===hi.slice(2);
+        else if(hi.indexOf("V:")===0) ok=pVarieties(p).indexOf(hi.slice(2))>=0;
+        else if(hi.indexOf("A:")===0) ok=p.lines.some(function(l){return (fld(l.fieldId)||{}).area===hi.slice(2);});
+        else if(hi==="W:washed") ok=!!p.washed;
+        else if(hi==="W:dirty") ok=!p.washed;
+        else if(hi==="W:d30"){var dd=daysBetween(p.inAt||pOldestHarvest(p),today());ok=!p.washed&&dd!=null&&dd>=30;}
+        if(!ok) dim=";opacity:.22";
+      }
+      var col=slotColor(p,mode);
+      s+='<div class="slot filled'+(UI.sel===p.id?" sel":"")+(UI.moveFrom===p.id?" moving":"")+(p.washed?" washed":"")+'" data-slot="'+key+'" data-p="'+p.id+'" title="'+esc(p.id)+'" style="border-left:7px solid '+col+';background:'+tint(col,0.22)+dim+'">'
+        +slotBody(p,t)+'</div>';
+    }else{
+      s+='<div class="slot'+(UI.dragMode&&UI.moveFrom?" targetable":"")+'" data-slot="'+key+'"><span class="tno">'+t+'</span></div>';
+    }
+  }
+  return s+'</div>';
+}
+
+var _tabletInit=false;
+function ensureOrientToggle(){
+  if(!_tabletInit){
+    _tabletInit=true;
+    if(applyPrefs()){ setTimeout(function(){ renderMaps(); },0); }
+    else
+    if(Math.min(window.innerWidth,window.innerHeight)>=700){
+      MAP_SIZE="fit";
+      MAP_VERT=(window.innerWidth<window.innerHeight);
+      document.body.classList.remove("map-s","map-l");
+      var ms=$("#mShow"); if(ms && !ms.value) ms.value="1";
+      setTimeout(function(){ renderMaps(); },0);
+    }
+  }
+  if(document.getElementById("mOrient")) return;
+  var host=$("#mShow"); if(!host||!host.parentNode||!host.parentNode.parentNode) return;
+  var box=document.createElement("div");
+  box.style.flex="0 0 auto";
+  box.innerHTML='<label class="fl">向き</label><select id="mOrient"><option value="v">縦（奥行を縦に）</option><option value="h">横（奥行を横に）</option></select>'
+    +'<span style="display:inline-block;width:8px"></span>';
+  var box2=document.createElement("div");
+  box2.style.flex="0 0 auto";
+  box2.innerHTML='<label class="fl">マスの大きさ</label><select id="mSize">'
+    +'<option value="fit">画面に合わせる</option><option value="s">小</option>'
+    +'<option value="m" selected>中</option><option value="l">大</option></select>';
+  var box3=document.createElement("div");
+  box3.style.flex="0 0 auto";
+  box3.innerHTML='<label class="fl">マスの表示</label><select id="mDisp">'
+    +'<option value="field">圃場（ふだん）</option><option value="date">収穫日（出荷前）</option>'
+    +'<option value="variety">品種</option><option value="id">パレット番号</option></select>';
+  var box4=document.createElement("div");
+  box4.style.flex="0 0 auto";
+  box4.innerHTML='<label class="fl">立ち位置に合わせる</label>'
+    +'<button type="button" class="btn ghost" id="mFlipX" style="padding:7px 10px">左右反転</button> '
+    +'<button type="button" class="btn ghost" id="mFlipY" style="padding:7px 10px">上下反転</button>';
+  host.parentNode.parentNode.insertBefore(box, host.parentNode.nextSibling);
+  var sel=document.getElementById("mOrient");
+  sel.value = MAP_VERT ? "v" : "h";
+  if(MAP_SIZE==="fit" && !$("#mShow").value) $("#mShow").value="1";
+  sel.onchange=function(){ MAP_VERT=(this.value==="v"); renderMaps(); savePrefs(); };
+  host.parentNode.parentNode.insertBefore(box2, box.nextSibling);
+  var sz=document.getElementById("mSize");
+  sz.value=MAP_SIZE;
+  document.body.classList.toggle("map-s",MAP_SIZE==="s");
+  document.body.classList.toggle("map-l",MAP_SIZE==="l");
+  sz.onchange=function(){
+    MAP_SIZE=this.value;
+    document.body.classList.toggle("map-s",MAP_SIZE==="s");
+    document.body.classList.toggle("map-l",MAP_SIZE==="l");
+    if(MAP_SIZE==="fit" && !$("#mShow").value){
+      $("#mShow").value="1";
+      toast("1画面に収めるため、貯蔵庫を1つずつ表示にしました");
+    }
+    renderMaps(); savePrefs();
+  };
+  host.parentNode.parentNode.insertBefore(box3, box2.nextSibling);
+  var dp=document.getElementById("mDisp");
+  dp.value=MAP_DISP;
+  dp.onchange=function(){ MAP_DISP=this.value; renderMaps(); savePrefs(); };
+  host.parentNode.parentNode.insertBefore(box4, box3.nextSibling);
+  var fx=document.getElementById("mFlipX"), fy=document.getElementById("mFlipY");
+  fx.classList.toggle("on",MAP_FLIPX); fy.classList.toggle("on",MAP_FLIPY);
+  fx.onclick=function(){ MAP_FLIPX=!MAP_FLIPX; this.classList.toggle("on",MAP_FLIPX); renderMaps(); savePrefs(); };
+  fy.onclick=function(){ MAP_FLIPY=!MAP_FLIPY; this.classList.toggle("on",MAP_FLIPY); renderMaps(); savePrefs(); };
+}
+</script>
+
+
+<div class="modalbg" id="qiModal"><div class="modal">
+  <h3 style="display:flex;align-items:center;gap:8px">この場所に入庫<button type="button" id="qiX" class="btn ghost" style="margin-left:auto;padding:8px 14px;font-size:16px;line-height:1">✕</button></h3>
+  <div class="okbox" id="qiWhere" style="margin-bottom:12px"></div>
+  <div class="grid3">
+    <div><label class="fl">品種</label><select id="qiVar"></select></div>
+    <div><label class="fl">等級（任意・未選別なら空欄）</label><select id="qiGrade"></select></div>
+    <div><label class="fl">状態</label><select id="qiWash"><option value="">土付き（ふだん）</option><option value="済">洗浄済 💧</option></select></div>
+    <div><label class="fl">エリア（圃場の絞り込み）</label><select id="qiArea"></select></div>
+  </div>
+  <h4 style="margin:14px 0 6px;font-size:14px">中身（圃場ごとに行を使う・足りなければ追加）</h4>
+  <div id="qiRows"></div>
+  <div style="margin-top:4px"><button type="button" class="btn ghost" id="qiAddRow" style="padding:7px 12px;font-size:12px">＋ 行を追加</button></div>
+  <div class="grid3" style="margin-top:12px">
+    <div><label class="fl">枚数（連続登録）</label><input type="number" id="qiNum" min="1" max="60" value="1"></div>
+    <div style="grid-column:span 2"><label class="fl">メモ</label><input type="text" id="qiNote"></div>
+  </div>
+  <div class="muted" id="qiPreview" style="margin-top:10px"></div>
+  <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" id="qiOk">登録する</button>
+    <button class="btn ghost" id="qiNo">キャンセル</button>
+    <button class="btn ghost" id="qiClear2">中身をクリア</button>
+  </div>
+</div></div>
+
+<style>
+#qiModal .modal{width:min(560px,100%)}
+.qirow{border:1px solid var(--line);border-radius:7px;padding:8px;margin-bottom:6px;background:#faf9f7}
+.qirow.empty{background:none;border-style:dashed;padding:6px 8px}
+.qihead{display:flex;align-items:center;gap:8px}
+.qino{font-size:11px;color:var(--muted);width:14px;flex:none;text-align:center}
+.qihead select{flex:1;min-width:0;font-size:15px;padding:9px 8px}
+.qidate{flex:0 0 auto;width:132px;font-size:14px;padding:9px 6px}
+@media(max-width:520px){.qihead{flex-wrap:wrap}.qidate{width:100%;margin-left:22px}}
+.qictl{display:flex;align-items:center;gap:7px;margin-top:8px;padding-left:22px;flex-wrap:wrap}
+.stp{width:44px;height:44px;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:22px;line-height:1;cursor:pointer;color:var(--ink);font-family:inherit;padding:0}
+.stp:active{background:#eee2d2}
+.qicnt{width:78px;height:44px;text-align:center;font-size:20px;font-weight:700;border:2px solid var(--accent);border-radius:7px;background:#fdf7ef;color:var(--accent);padding:0}
+.qikg{font-size:12px;color:var(--muted);min-width:100px}
+.qifrac{display:flex;flex-direction:column}
+.qifrac select{height:44px;font-size:15px;padding:0 6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:7px;padding:9px 13px;font-size:13px;cursor:pointer;color:var(--muted);font-family:inherit}
+.chip:active,.chip.on{background:#eee2d2;color:var(--ink)}
+.qisum{display:flex;justify-content:space-between;align-items:center;background:#f6efe6;border:1px solid #e2d5c2;border-radius:7px;padding:10px 12px;margin-top:2px}
+.qisum b{font-size:18px}
+@media(max-width:640px){.qictl .chip{padding:9px 10px}}
+#qiPreview b{color:var(--accent)}
+.slot.nextfill{outline:2px dashed var(--accent2);outline-offset:-2px}
+</style>
+
+<script>
+var QI = {last:null, slot:null, rows:[]};
+var QI_ROWS = 6;
+var QI_MAX_ROWS = 14;
+
+function onSlotClick(e){
+  var el=e.currentTarget;
+  if(el.dataset.p){ openPallet(el.dataset.p); return; }
+  var a=el.dataset.slot.split(",").map(Number);
+  openQuick({wh:a[0], r:a[1], c:a[2], t:a[3]});
+}
+
+function qiFieldOpts(sel){
+  var a=$("#qiArea").value;
+  var list=S.fields.filter(function(f){return f.active && (!a||f.area===a);});
+  var has=false;
+  var h='<option value="">（なし）</option>';
+  list.forEach(function(f){
+    if(f.id===sel) has=true;
+    h+='<option value="'+esc(f.id)+'"'+(f.id===sel?' selected':'')+'>'+esc(f.id+" "+f.name)+(f.crop&&f.crop!=="さつまいも"?"（"+esc(f.crop)+"）":"")+'</option>';
+  });
+  if(sel && !has){ var f2=fld(sel); h+='<option value="'+esc(sel)+'" selected>'+esc(f2?f2.id+" "+f2.name:sel)+'（他エリア）</option>'; }
+  return h;
+}
+
+function qiPrevDate(i){
+  for(var k=i-1;k>=0;k--){ var r=QI.rows[k]; if(r&&r.h) return r.h; }
+  for(var k2=i+1;k2<QI_ROWS;k2++){ var r2=QI.rows[k2]; if(r2&&r2.h) return r2.h; }
+  return (QI.last&&QI.last.lastDate) || today();
+}
+function qiVal(i){
+  var r=QI.rows[i]||{}; 
+  return r2((Number(r.n)||0) + (Number(r.f)||0));
+}
+function qiRemaining(exceptIdx){
+  var t=0;
+  QI.rows.forEach(function(r,i){ if(i!==exceptIdx && r && r.fieldId) t+=qiVal(i); });
+  return Math.max(0, r2(S.config.maxPerPallet - t));
+}
+function qiRowHtml(i){
+  var r=QI.rows[i]||{fieldId:"",n:"",f:0};
+  if(!r.fieldId){
+    return '<div class="qirow empty" data-i="'+i+'"><div class="qihead"><span class="qino">'+(i+1)+'</span>'
+      +'<select data-qf="'+i+'">'+qiFieldOpts("")+'</select></div></div>';
+  }
+  var n=Number(r.n)||0, f=Number(r.f)||0, v=qiVal(i);
+  var chips=[6,12,18,24].map(function(x){
+    return '<button type="button" class="chip'+(n===x?' on':'')+'" data-chip="'+i+'" data-v="'+x+'">'+x+'</button>';
+  }).join("");
+  var fo=[0,0.25,0.5,0.75].map(function(x){
+    return '<option value="'+x+'"'+(Math.abs(f-x)<0.001?' selected':'')+'>'+(x===0?'なし':('+'+x))+'</option>';
+  }).join("");
+  return '<div class="qirow" data-i="'+i+'"><div class="qihead"><span class="qino">'+(i+1)+'</span>'
+    +'<select data-qf="'+i+'">'+qiFieldOpts(r.fieldId)+'</select>'
+    +'<input type="date" class="qidate" data-qh="'+i+'" value="'+esc(r.h||qiPrevDate(i))+'">'
+    +'</div>'
+    +'<div class="qictl">'
+    +'<button type="button" class="stp" data-step="'+i+'" data-d="-1">−</button>'
+    +'<input type="number" class="qicnt" inputmode="numeric" pattern="[0-9]*" min="0" max="99" data-qc="'+i+'" value="'+n+'">'
+    +'<button type="button" class="stp" data-step="'+i+'" data-d="1">＋</button>'
+    +'<span class="qifrac"><label class="fl" style="margin:0 0 2px">端数</label>'
+    +'<select data-qd="'+i+'">'+fo+'</select></span>'
+    +'<span class="qikg" data-qk="'+i+'">'+qiKgTxt(v)+'</span>'
+    +'</div>'
+    +'<div class="qictl" style="margin-top:6px">'+chips+'</div></div>';
+}
+function qiKgTxt(v){ return v? (r2(v)+' カゴ / '+r1(v*S.config.unitWeightKg)+' kg') : ''; }
+function qiTotal(){
+  var t=0;
+  QI.rows.forEach(function(r,i){ if(r&&r.fieldId) t+=qiVal(i); });
+  return r2(t);
+}
+function qiUpdateSum(){
+  var t=qiTotal(), over=t>S.config.maxPerPallet;
+  var e=document.getElementById("qiSum");
+  if(e) e.innerHTML='<span style="font-weight:500">合計</span><b'+(over?' style="color:var(--danger)"':'')+'>'
+    +r2(t)+' / '+S.config.maxPerPallet+' カゴ　'+r1(t*S.config.unitWeightKg).toLocaleString()+' kg</b>';
+}
+function qiRefreshRow(i){
+  var v=qiVal(i);
+  var kg=document.querySelector('#qiRows [data-qk="'+i+'"]');
+  if(kg) kg.textContent=qiKgTxt(v);
+  var n=Number((QI.rows[i]||{}).n)||0;
+  $$('#qiRows .chip[data-chip="'+i+'"]').forEach(function(ch){ ch.classList.toggle('on', Number(ch.dataset.v)===n); });
+  qiUpdateSum(); qiPreview();
+}
+function qiSetN(i,v){
+  v=Math.max(0,Math.min(99,Math.round(Number(v)||0)));
+  QI.rows[i]=QI.rows[i]||{fieldId:"",n:0,f:0};
+  QI.rows[i].n=v;
+  var inp=document.querySelector('#qiRows input[data-qc="'+i+'"]');
+  if(inp && Number(inp.value)!==v) inp.value=v;
+  qiRefreshRow(i);
+}
+function qiSetF(i,v){
+  v=r2(Number(v)||0);
+  QI.rows[i]=QI.rows[i]||{fieldId:"",n:0,f:0};
+  QI.rows[i].f=v;
+  qiRefreshRow(i);
+}
+function qiBindRow(i){
+  var wrap=document.querySelector('#qiRows .qirow[data-i="'+i+'"]');
+  if(!wrap) return;
+  var sel=wrap.querySelector('select[data-qf]');
+  if(sel) sel.onchange=function(){
+    QI.rows[i]=QI.rows[i]||{fieldId:"",n:0,f:0};
+    var had=!!QI.rows[i].fieldId;
+    QI.rows[i].fieldId=this.value;
+    if(this.value && (!had || !Number(QI.rows[i].n))){
+      var rem=qiRemaining(i);
+      QI.rows[i].n = Math.floor(rem)>0 ? Math.floor(rem) : 6;
+      QI.rows[i].f = 0;
+    }
+    if(this.value && !QI.rows[i].h) QI.rows[i].h=qiPrevDate(i);
+    if(!this.value){ QI.rows[i].n=""; QI.rows[i].f=0; }
+    qiReplaceRow(i, true);
+    qiUpdateSum(); qiPreview();
+  };
+  var inp=wrap.querySelector('input[data-qc]');
+  if(inp) inp.oninput=function(){ qiSetN(i,this.value); };
+  var fs=wrap.querySelector('select[data-qd]');
+  if(fs) fs.onchange=function(){ qiSetF(i,this.value); };
+  var hd=wrap.querySelector('input[data-qh]');
+  if(hd) hd.onchange=function(){ QI.rows[i]=QI.rows[i]||{}; QI.rows[i].h=this.value; QI.rows[i]._touched=true; qiPreview(); };
+  wrap.querySelectorAll('.stp').forEach(function(b){
+    b.onclick=function(){ qiSetN(i,(Number(QI.rows[i].n)||0)+Number(this.dataset.d)); };
+  });
+  wrap.querySelectorAll('.chip').forEach(function(b){
+    b.onclick=function(){ qiSetN(i,Number(this.dataset.v)); };
+  });
+}
+function qiReplaceRow(i, focusCount){
+  var old=document.querySelector('#qiRows .qirow[data-i="'+i+'"]');
+  if(!old) return;
+  var tmp=document.createElement('div');
+  tmp.innerHTML=qiRowHtml(i);
+  old.parentNode.replaceChild(tmp.firstChild, old);
+  qiBindRow(i);
+  if(focusCount){
+    var inp=document.querySelector('#qiRows input[data-qc="'+i+'"]');
+    if(inp){ inp.focus(); if(inp.select) inp.select(); }
+  }
+}
+function qiRenderRows(){
+  var h='';
+  for(var i=0;i<QI_ROWS;i++) h+=qiRowHtml(i);
+  h+='<div class="qisum" id="qiSum"></div>';
+  $("#qiRows").innerHTML=h;
+  for(var j=0;j<QI_ROWS;j++) qiBindRow(j);
+  qiUpdateSum();
+  return qiTotal();
+}
+function qiSync(){}
+function qiTotalOnly(){ qiUpdateSum(); }
+
+function openQuick(slot){
+  QI.slot=slot;
+  var areas=AREA_ORDER.filter(function(a){return S.fields.some(function(f){return f.active&&f.area===a;});});
+  $("#qiArea").innerHTML='<option value="">全エリア</option>'+areas.map(function(a){return '<option>'+esc(a)+'</option>';}).join("");
+  $("#qiVar").innerHTML=S.config.varieties.map(function(v){return '<option>'+esc(v)+'</option>';}).join("");
+  $("#qiGrade").innerHTML='<option value="">未選別</option>'+GRADES.map(function(g){return '<option>'+g+'</option>';}).join("");
+  var L=QI.last||{};
+  $("#qiArea").value=L.area||"";
+  $("#qiVar").value=L.variety||S.config.varieties[0]||"";
+  $("#qiGrade").value=L.grade||"";
+  $("#qiWash").value=L.wash||"";
+  $("#qiNum").value=1;
+  $("#qiNote").value="";
+  QI.rows=[];
+  if(L.rows&&L.rows.length) L.rows.forEach(function(r,i){ QI.rows[i]={fieldId:r.fieldId,n:r.n,f:r.f||0,h:r.h||""}; });
+  QI.rows[0]=QI.rows[0]||{fieldId:"",n:"",f:0,h:""};
+  QI_ROWS=Math.max(6,Math.min(QI_MAX_ROWS,QI.rows.filter(function(r){return r&&r.fieldId;}).length+1));
+  $("#qiWhere").innerHTML='置き場所：<b>'+esc(locStr2(slot.wh,slot.r,slot.c,slot.t))+'</b>　／　パレット番号 <b id="qiNextId">…</b>';
+  qiRenderRows(); qiPreview(); qiPeekId();
+  $("#qiModal").classList.add("open");
+}
+
+var qiIdTimer=null;
+function qiPeekId(){
+  clearTimeout(qiIdTimer);
+  qiIdTimer=setTimeout(function(){
+    call("peekNextPalletId")
+      .then(function(v){ var e=document.getElementById("qiNextId"); if(e) e.textContent=v; })
+      .catch(function(){ var e=document.getElementById("qiNextId"); if(e) e.textContent="—"; });
+  },250);
+}
+
+function qiSlots(n){
+  var out=[], seen={}, s=QI.slot; if(!s) return out;
+  var whs=S.config.warehouses, wi=0;
+  for(var i=0;i<whs.length;i++) if(whs[i].id===s.wh) wi=i;
+  var order=[], w0=whs[wi];
+  var push=function(w,r,c,t){ order.push({wh:w,r:r,c:c,t:t}); };
+  for(var c=s.c;c<=w0.cols;c++) for(var r=(c===s.c?s.r:1);r<=w0.rows;r++) for(var t=(c===s.c&&r===s.r?s.t:1);t<=w0.tiers;t++) push(w0.id,r,c,t);
+  for(var c2=1;c2<s.c;c2++) for(var r2=1;r2<=w0.rows;r2++) for(var t2=1;t2<=w0.tiers;t2++) push(w0.id,r2,c2,t2);
+  whs.forEach(function(o){ if(o.id===w0.id) return;
+    for(var c3=1;c3<=o.cols;c3++) for(var r3=1;r3<=o.rows;r3++) for(var t3=1;t3<=o.tiers;t3++) push(o.id,r3,c3,t3); });
+  for(var k=0;k<order.length && out.length<n;k++){
+    var o=order[k], key=o.wh+','+o.r+','+o.c+','+o.t;
+    if(seen[key]) continue;
+    if(palletAt(o.wh,o.r,o.c,o.t)) continue;
+    seen[key]=1; out.push(o);
+  }
+  return out;
+}
+
+function qiPreview(){
+  var n=Math.max(1,Math.min(60,Number($("#qiNum").value)||1));
+  var cnt=qiTotal();
+  var sl=qiSlots(n);
+  $$("#maps .slot.nextfill").forEach(function(x){x.classList.remove("nextfill");});
+  sl.forEach(function(o){
+    var el=document.querySelector('#maps .slot[data-slot="'+o.wh+','+o.r+','+o.c+','+o.t+'"]');
+    if(el) el.classList.add("nextfill");
+  });
+  var txt;
+  if(!cnt) txt='<span style="color:var(--danger)">圃場とカゴ数を入れてください。</span>';
+  else if(!sl.length) txt='空きがありません。';
+  else if(n===1) txt='<b>'+esc(locStr2(sl[0].wh,sl[0].r,sl[0].c,sl[0].t))+'</b> に 1枚（'+r2(cnt)+'カゴ / '+r1(cnt*S.config.unitWeightKg)+'kg）';
+  else txt='<b>'+esc(locStr2(sl[0].wh,sl[0].r,sl[0].c,sl[0].t))+'</b> から <b>'+esc(locStr2(sl[sl.length-1].wh,sl[sl.length-1].r,sl[sl.length-1].c,sl[sl.length-1].t))
+    +'</b> へ '+sl.length+'枚（計 '+r2(cnt*sl.length)+'カゴ / '+r1(cnt*sl.length*S.config.unitWeightKg).toLocaleString()+'kg）'
+    +(sl.length<n?' <span style="color:var(--danger)">※空きが'+sl.length+'枚ぶんしかありません</span>':'');
+  $("#qiPreview").innerHTML='図面上の点線がその位置です。 '+txt;
+}
+
+function qiClose(){
+  $("#qiModal").classList.remove("open");
+  $$("#maps .slot.nextfill").forEach(function(x){x.classList.remove("nextfill");});
+}
+
+function doQuick(){
+  qiSync();
+  var hv=today();
+  var vr=$("#qiVar").value;
+  var lines=[];
+  QI.rows.forEach(function(r,i){
+    if(!r||!r.fieldId) return;
+    var c=qiVal(i); if(c<=0) return;
+    lines.push({harvestAt:(r.h||hv), fieldId:r.fieldId, variety:vr, count:c});
+  });
+  if(!lines.length){ toast("圃場とカゴ数を入れてください"); return; }
+  var n=Math.max(1,Math.min(60,Number($("#qiNum").value)||1));
+  var sl=qiSlots(n);
+  if(!sl.length){ toast("空きがありません"); return; }
+  QI.last={area:$("#qiArea").value, variety:vr, grade:$("#qiGrade").value, wash:$("#qiWash").value,
+           lastDate:(QI.rows.filter(function(r){return r&&r.h;})[0]||{}).h||hv,
+           rows:QI.rows.map(function(r){return r?{fieldId:r.fieldId,n:r.n,f:r.f||0,h:r.h||""}:{fieldId:"",n:"",f:0,h:""};})};
+  var payload={wh:QI.slot.wh, loc:{r:QI.slot.r,c:QI.slot.c,t:QI.slot.t},
+    grade:$("#qiGrade").value, washed:$("#qiWash").value, harvestAt:hv, inAt:hv, note:$("#qiNote").value||"", lines:lines};
+  qiClose();
+  /* 楽観更新: 予定マスに即表示し、保存は裏で行う */
+  var baseTxt=((document.getElementById("qiNextId")||{}).textContent||"").trim();
+  var mnum=/^P(\d+)$/.exec(baseTxt);
+  var temps=[];
+  for(var ti=0;ti<sl.length;ti++){
+    var tid="P----";
+    if(mnum){ var nn=String(Number(mnum[1])+ti); while(nn.length<4)nn="0"+nn; tid="P"+nn; }
+    var tp={id:tid,wh:sl[ti].wh,loc:{r:sl[ti].r,c:sl[ti].c,t:sl[ti].t},status:"在庫",
+      grade:payload.grade||"",inAt:hv,outAt:"",note:payload.note||"",updatedAt:"",updatedBy:"",
+      washed:(payload.washed==="済"?"済":""),lines:JSON.parse(JSON.stringify(lines)),_tmp:1};
+    temps.push(tp); S.pallets.push(tp);
+  }
+  renderAll();
+  toast(sl.length+"枚 登録しました（保存中…）");
+  enqueue(function(){ return call("createPalletsBulk", payload, sl.length); }).then(function(st){
+    applyState(st);
+    var ids=(st&&st.createdIds)||[];
+    if(ids.length) toast(sl.length+"枚 登録しました（"+ids[0]+(ids.length>1?"〜"+ids[ids.length-1]:"")+"）");
+  }).catch(function(e){
+    S.pallets=S.pallets.filter(function(x){return temps.indexOf(x)<0;});
+    renderAll();
+    toast("登録の保存に失敗しました: "+(e&&e.message?e.message:e));
+    reload();
+  });
+}
+
+(function bindQuick(){
+  $("#qiOk").onclick=doQuick;
+  $("#qiNo").onclick=qiClose; $("#qiX").onclick=qiClose;
+  $("#qiClear2").onclick=function(){ QI.rows=[{fieldId:"",n:"",f:0,h:""}]; QI_ROWS=6; qiRenderRows(); qiPreview(); };
+  $("#qiAddRow").onclick=function(){
+    if(QI_ROWS>=QI_MAX_ROWS){ toast("1パレットに入れられるのは最大"+QI_MAX_ROWS+"圃場までです"); return; }
+    QI_ROWS++; qiRenderRows(); qiPreview();
+  };
+  $("#qiArea").onchange=function(){ qiRenderRows(); qiPreview(); };
+  $("#qiNum").oninput=qiPreview;
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape") qiClose();
+    if(e.key==="Enter" && $("#qiModal").classList.contains("open") && e.target.tagName!=="SELECT"){ e.preventDefault(); doQuick(); }
+  });
+})();
+</script>
+
+
+<style>
+/* 押している間 */
+.slot.press{background:#f3e6d3 !important;box-shadow:inset 0 0 0 2px var(--accent);z-index:3}
+.slot.filled.press .pid{color:var(--accent)}
+/* いま選んでいるパレット */
+.slot.sel{outline:3px solid var(--accent);outline-offset:-3px;background:#fbf1e4 !important;z-index:4}
+.slot.filled.sel .pid{color:var(--accent);font-weight:700}
+.slot.filled{transition:background .08s}
+</style>
+
+<script>
+(function pressFeedback(){
+  var cur=null;
+  function clear(){ if(cur){cur.classList.remove("press");cur=null;} }
+  document.addEventListener("pointerdown",function(e){
+    var el=e.target&&e.target.closest?e.target.closest(".slot"):null;
+    if(!el) return;
+    clear(); cur=el; el.classList.add("press");
+  },true);
+  ["pointerup","pointercancel","pointerleave","touchend","touchcancel"].forEach(function(ev){
+    document.addEventListener(ev,function(){ setTimeout(clear,120); },true);
+  });
+  document.addEventListener("pointermove",function(e){
+    if(!cur) return;
+    var el=e.target&&e.target.closest?e.target.closest(".slot"):null;
+    if(el!==cur) clear();
+  },true);
+})();
+</script>
+
+
+<style>
+.slot.sel{outline:3px solid var(--accent) !important;outline-offset:-3px;background:#fbf1e4 !important;z-index:4}
+.slot.filled.sel .pid{color:var(--accent);font-weight:700}
+.taphint{font-size:11px;color:var(--muted);margin:6px 0 0;letter-spacing:.02em}
+.taphint b{color:var(--accent)}
+</style>
+
+<script>
+var TAP={el:null,t:0};
+function hidePeek(){ var e=document.getElementById("peek"); if(e) e.classList.remove("show"); }
+function showPeek(p){
+  var e=document.getElementById("peek");
+  if(!e||!p){ hidePeek(); return; }
+  var col=GRADE_COLOR[p.grade||""]||"#c9c3ba";
+  var rows="";
+  p.lines.forEach(function(l){
+    var f=fld(l.fieldId)||{};
+    rows+='<tr><td><b>'+esc(f.name||l.fieldId)+'</b></td>'
+        +'<td style="text-align:right"><b>'+r2(Number(l.count)||0)+'</b></td>'
+        +'<td style="text-align:right;color:#6f675d;width:64px">'+esc(md(l.harvestAt))+'</td></tr>';
+  });
+  e.innerHTML='<div class="pk-head">'
+    +'<span class="pk-grade" style="background:'+col+'">'+esc(p.grade||"未")+'</span>'
+    +(p.washed?'<span class="pk-wash">💧洗浄済</span>':'')
+    +'<span class="pk-loc">'+esc(locStr(p))+'</span>'
+    +'<span class="pk-meta">'+esc(p.id)+'・'+esc(pVarLabel(p)||"品種なし")+'</span>'
+    +'</div>'
+    +'<table><tr><th>圃場</th><th style="text-align:right">カゴ</th><th style="text-align:right">収穫日</th></tr>'+rows
+    +'<tr class="pk-total"><td>合計</td><td style="text-align:right">'+r2(pCount(p))+'</td>'
+    +'<td style="text-align:right">'+r1(pKg(p)).toLocaleString()+' kg</td></tr></table>'
+    +'<div class="pk-btns">'
+    +'<button class="btn sec" id="pkOpen">詳細を開く</button>'
+    +'<button class="btn sec" id="pkMove">移動</button>'
+    +'<button class="btn sec" id="pkShip">出庫</button>'
+    +'<button class="btn ghost" id="pkClose" style="margin-left:auto">✕ 閉じる</button></div>';
+  e.classList.add("show");
+  document.getElementById("pkClose").onclick=hidePeek;
+  document.getElementById("pkOpen").onclick=function(){ hidePeek(); openPallet(p.id); };
+  document.getElementById("pkShip").onclick=function(){ hidePeek(); UI.sel=p.id; openShip(); };
+  document.getElementById("pkMove").onclick=function(){
+    hidePeek();
+    setDragMode(true);
+    UI.moveFrom=p.id; UI.sel=p.id;
+    renderMaps(); moveBar();
+  };
+}
+var UI_SELKEY=null;
+
+function selectSlot(el){
+  $$("#maps .slot.sel").forEach(function(x){x.classList.remove("sel");});
+  el.classList.add("sel");
+  UI_SELKEY = el.dataset.slot || null;
+  UI.sel = el.dataset.p || null;
+}
+
+function applySel(){
+  if(!UI_SELKEY) return;
+  var el=document.querySelector('#maps .slot[data-slot="'+UI_SELKEY+'"]');
+  if(el) el.classList.add("sel");
+}
+
+var _prevRenderMaps = renderMaps;
+renderMaps = function(){ _prevRenderMaps.apply(null, arguments); applySel(); ensureTapHint(); };
+
+function ensureTapHint(){
+  if(document.getElementById("tapHint")) return;
+  var m=document.getElementById("maps"); if(!m||!m.parentNode) return;
+  var p=document.createElement("p");
+  p.id="tapHint"; p.className="taphint";
+  p.innerHTML='<b>1回タップ</b>＝選択　／　<b>2回タップ</b>＝開く（パレットは詳細、空きマスは入庫）　／　移動は上の<b>「パレットを移動する」</b>から';
+  m.parentNode.insertBefore(p, m.nextSibling);
+}
+
+function openSlot(el){
+  if(el.dataset.p){ openPallet(el.dataset.p); return; }
+  var a=el.dataset.slot.split(",").map(Number);
+  openQuick({wh:a[0], r:a[1], c:a[2], t:a[3]});
+}
+
+function onSlotClick(e){
+  var el=e.currentTarget;
+  if(UI.dragMode){
+    if(!UI.moveFrom){
+      if(!el.dataset.p){ toast("動かすパレットをタップしてください"); return; }
+      UI.moveFrom=el.dataset.p;
+      UI.sel=el.dataset.p; UI_SELKEY=el.dataset.slot;
+      renderMaps(); moveBar();
+      return;
+    }
+    var a=el.dataset.slot.split(",").map(Number);
+    var src2=pById(UI.moveFrom);
+    if(src2 && src2.loc && src2.wh===a[0] && src2.loc.r===a[1] && src2.loc.c===a[2] && src2.loc.t===a[3]){
+      toast("同じ場所です"); return;
+    }
+    var id=UI.moveFrom;
+    var occ=palletAt(a[0],a[1],a[2],a[3]);
+    if(occ){
+      ask(occ.id+"（"+pCount(occ)+"カゴ）がすでに置かれています。\n"+id+" と場所を入れ替えますか？","入れ替えの確認","入れ替える")
+      .then(function(yes){
+        if(!yes){ moveBar(); return; }
+        UI.moveFrom=null;
+        dropPallet(id,a[0],a[1],a[2],a[3],"",true);
+      });
+      return;
+    }
+    UI.moveFrom=null;
+    dropPallet(id,a[0],a[1],a[2],a[3]);
+    return;
+  }
+  var now=Date.now();
+  var isDouble = (TAP.el===el && now-TAP.t<400);
+  TAP.el=el; TAP.t=now;
+  selectSlot(el);
+  if(el.dataset.p) showPeek(pById(el.dataset.p)); else hidePeek();
+  if(isDouble){ TAP.el=null; hidePeek(); openSlot(el); }
+}
+
+if(document.getElementById("maps")) ensureTapHint();
+</script>
+
+</body>
+</html>
