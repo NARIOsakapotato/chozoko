@@ -523,6 +523,23 @@ function call(fn){
     })
     .catch(function(e){ fin(); throw e; });
 }
+/* 軽量応答の補完: 全履歴・出荷明細はタブを開いたときにだけ取得 */
+var _fullBusy=false;
+function ensureFull(cb){
+  if(!S || !S.lite){ cb(); return; }
+  if(_fullBusy){ setTimeout(function(){ ensureFull(cb); },300); return; }
+  _fullBusy=true;
+  call("getFullExtras").then(function(r){
+    _fullBusy=false;
+    S.shipments=r.shipments; S.log=r.log; S.lite=0;
+    cb();
+  }).catch(function(e){
+    _fullBusy=false;
+    toast("詳細データの取得に失敗しました: "+(e&&e.message?e.message:e));
+    cb();
+  });
+}
+
 function saveSnap_(){
   try{
     var s={config:S.config,fields:S.fields,fieldSource:S.fieldSource,pallets:S.pallets,
@@ -1624,8 +1641,9 @@ function renderKPI(){
   var ww=$("#kWashWrap"); if(ww){ ww.style.display=wc>0?"":"none"; $("#kWash").textContent=r2(wc).toLocaleString(); }
   $("#whoami").textContent="操作者: "+(S.me||"不明")+" ／ データ: このスプレッドシート（全員共有）";
 }
-var TABR={in:renderRecent, out:renderShipTab, stock:renderStock, agg:renderAgg,
-          eff:renderEff, log:renderLog, conf:function(){renderFields();renderConf();}};
+var TABR={in:renderRecent, out:function(){ensureFull(renderShipTab);}, stock:renderStock,
+          agg:function(){ensureFull(renderAgg);},
+          eff:renderEff, log:function(){ensureFull(renderLog);}, conf:function(){renderFields();renderConf();}};
 var TABDIRTY={};
 function curTab(){
   var b=document.querySelector("nav button.active");
@@ -1741,7 +1759,7 @@ function bind(){
   var aw=$("#aWash"); if(aw) aw.onchange=renderAgg;
   ["#lType","#lFrom","#lTo"].forEach(function(s){$(s).onchange=renderLog;}); $("#lQ").oninput=renderLog;
   $("#fFilter").onchange=renderFields;
-  $("#oCsv").onclick=csvShip; $("#sCsv").onclick=csvStock; $("#aCsv").onclick=csvAgg; $("#lCsv").onclick=csvLog; $("#fOut").onclick=csvFields;
+  $("#oCsv").onclick=function(){ensureFull(csvShip);}; $("#sCsv").onclick=csvStock; $("#aCsv").onclick=function(){ensureFull(csvAgg);}; $("#lCsv").onclick=function(){ensureFull(csvLog);}; $("#fOut").onclick=csvFields;
   $("#fReload").onclick=function(){toast("圃場マスタを読み込んでいます…");mutate("reloadFields").then(function(){toast("圃場マスタを更新しました");});};
 
   $("#cSave").onclick=function(){
@@ -1811,24 +1829,41 @@ function startApp(){
       S=cached; UI.stamp=null;
       renderAll();
       document.getElementById("boot").style.display="none";
-      toast("前回のデータを表示中 — 最新を取得しています…");
+      toast("前回のデータを表示中 — 確認しています…");
     }catch(e){ S=null; cached=null; }
   }
-  call("getStateFresh").then(function(st){
-    applyState(st,true);
-    document.getElementById("boot").style.display="none";
-    startPolling();
-    if(cached) toast("最新のデータに更新しました");
-  }).catch(function(e){
-    if(cached){
-      toast("最新の取得に失敗しました（前回のデータを表示中）");
+  function fullBoot(){
+    call("getStateFresh").then(function(st){
+      applyState(st,true);
+      document.getElementById("boot").style.display="none";
       startPolling();
-      return;
-    }
-    document.getElementById("boot").innerHTML=
-      '<div class="errbox" style="max-width:520px">読み込みに失敗しました。<br><br>'+esc(e&&e.message?e.message:e)
-      +'<br><br>通信環境をご確認のうえ、再読み込みしてください。</div>';
-  });
+      if(cached) toast("最新のデータに更新しました");
+    }).catch(function(e){
+      if(cached){
+        toast("最新の取得に失敗しました（前回のデータを表示中）");
+        startPolling();
+        return;
+      }
+      document.getElementById("boot").innerHTML=
+        '<div class="errbox" style="max-width:520px">読み込みに失敗しました。<br><br>'+esc(e&&e.message?e.message:e)
+        +'<br><br>通信環境をご確認のうえ、再読み込みしてください。</div>';
+    });
+  }
+  if(cached && cached.stamp){
+    call("getStamp").then(function(s){
+      if(s===cached.stamp){
+        UI.stamp=s;
+        document.getElementById("boot").style.display="none";
+        startPolling();
+        toast("最新の状態です");
+      } else {
+        toast("更新があります — 取得しています…");
+        fullBoot();
+      }
+    }).catch(function(){ fullBoot(); });
+  } else {
+    fullBoot();
+  }
 }
 (function gate(){
   if(API_KEY) startApp();
