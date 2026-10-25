@@ -604,7 +604,7 @@ function mutate(fn){
 window.addEventListener("beforeunload",function(e){
   if(PEND.length){ e.preventDefault(); e.returnValue="保存が完了していません"; }
 });
-function reload(){ return call("getStateFresh").then(function(st){ applyState(st,true); }).catch(function(e){ toast("読込エラー: "+(e&&e.message?e.message:e)); }); }
+function reload(){ return call("getState").then(function(st){ applyState(st,true); }).catch(function(e){ toast("読込エラー: "+(e&&e.message?e.message:e)); }); }
 
 /* ---------- ユーティリティ ---------- */
 function $(s){return document.querySelector(s);}
