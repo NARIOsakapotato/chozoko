@@ -512,7 +512,7 @@ function call(fn){
   var t0=(window.performance&&performance.now)?performance.now():Date.now();
   var done=false; function fin(){ if(!done){ done=true; busy(false);
     try{ perfLog_(fn,((window.performance&&performance.now)?performance.now():Date.now())-t0); }catch(e){} } }
-  return fetch(API_URL,{method:"POST",body:JSON.stringify({key:API_KEY,fn:fn,args:args})})
+  return fetch(API_URL,{method:"POST",keepalive:true,body:JSON.stringify({key:API_KEY,fn:fn,args:args})})
     .then(function(r){ return r.json(); })
     .then(function(j){
       fin();
@@ -567,13 +567,43 @@ function enqueue(fn){
   _mq=r.catch(function(){});
   return r;
 }
+var MUT_NAMES={movePallet:"移動",updatePallet:"内容修正",deletePallet:"削除",createPallet:"入庫",createPalletsBulk:"まとめて入庫",shipPallet:"出庫",washReturn:"洗浄戻り",cancelShip:"出庫の取消",saveConf:"設定保存",reloadFields:"圃場再読込"};
+var PEND=[];
+function pendSave_(){ try{ localStorage.setItem("PEND_V1",JSON.stringify(PEND)); }catch(e){} }
+function pendUI_(){
+  var el=document.getElementById("pend");
+  if(!el){
+    el=document.createElement("div");
+    el.id="pend";
+    el.style.cssText="position:fixed;right:10px;bottom:10px;z-index:150;background:rgba(47,107,62,.92);color:#fff;font-size:11px;padding:4px 10px;border-radius:99px;display:none";
+    document.body.appendChild(el);
+  }
+  if(PEND.length){ el.textContent="💾 保存中… "+PEND.length+"件"; el.style.display="block"; }
+  else el.style.display="none";
+}
+function pendAdd_(fn,args){
+  var id="";
+  if(args&&args.length){ var a0=args[0]; id=(a0&&typeof a0==="object")?(a0.id||a0.palletId||""):(typeof a0==="string"?a0:""); }
+  var it={k:Date.now()+Math.random(),desc:(MUT_NAMES[fn]||fn)+(id?(" "+id):"")};
+  PEND.push(it); pendSave_(); pendUI_(); return it;
+}
+function pendDone_(it){ PEND=PEND.filter(function(x){return x.k!==it.k;}); pendSave_(); pendUI_(); }
 function mutate(fn){
   var args=Array.prototype.slice.call(arguments,1);
+  var it=pendAdd_(fn,args);
   return enqueue(function(){ return call.apply(null,[fn].concat(args)); }).then(function(st){
+    pendDone_(it);
     if(st && st.light){ if(st.stamp) UI.stamp=st.stamp; renderKPI(); return st; }
     applyState(st); return st;
-  }).catch(function(e){ toast("エラー: "+(e&&e.message?e.message:e)); return reload(); });
+  }).catch(function(e){
+    pendDone_(it);
+    ask("「"+(it.desc)+"」の保存ができませんでした。\n\n"+(e&&e.message?e.message:e)+"\n\n画面をサーバーの最新状態に戻します。お手数ですが、もう一度やり直してください。","保存エラー","わかった");
+    return reload();
+  });
 }
+window.addEventListener("beforeunload",function(e){
+  if(PEND.length){ e.preventDefault(); e.returnValue="保存が完了していません"; }
+});
 function reload(){ return call("getStateFresh").then(function(st){ applyState(st,true); }).catch(function(e){ toast("読込エラー: "+(e&&e.message?e.message:e)); }); }
 
 /* ---------- ユーティリティ ---------- */
@@ -1719,8 +1749,13 @@ function bind(){
   $("#dSave").onclick=function(){
     var p=pById(UI.sel); if(!p) return;
     var lines=p.lines.filter(function(l){return Number(l.count)>0;});
-    mutate("updatePallet",{id:p.id,grade:$("#dGrade").value,inAt:$("#dIn").value,note:$("#dNote").value,lines:lines})
-      .then(function(){ var q=pById(p.id); if(q&&q.status==="在庫") openPallet(p.id); else closeDrawer(); toast("保存しました"); });
+    p.grade=$("#dGrade").value; p.inAt=$("#dIn").value||p.inAt; p.note=$("#dNote").value;
+    p.lines=lines;
+    if(lines.length===0 && p.status==="在庫"){ p.status="出庫済"; p.loc=null; p.outAt=today(); }
+    renderAll();
+    if(p.status==="在庫") openPallet(p.id); else closeDrawer();
+    toast("保存しました");
+    mutate("updatePallet",{id:p.id,grade:p.grade,inAt:p.inAt,note:p.note,lines:lines});
   };
   $("#dMove").onclick=openMove;
   $("#dShip").onclick=openShip;
@@ -1736,7 +1771,10 @@ function bind(){
     ask("パレット "+p.id+" を削除します。\n\n中身 "+pCount(p)+"カゴ（"+r1(pKg(p))+"kg）の記録も一緒に消えます。\n履歴には削除した記録が残ります。","パレットの削除","削除する")
       .then(function(yes){
         if(!yes) return;
-        mutate("deletePallet",p.id).then(function(){closeDrawer();toast("削除しました");});
+        var delId=p.id;
+        S.pallets=S.pallets.filter(function(x){return x.id!==delId;});
+        closeDrawer(); renderAll(); toast("削除しました");
+        mutate("deletePallet",delId);
       });
   };
 
@@ -1821,6 +1859,13 @@ function showLogin(){
 function startApp(){
   window.__appStarted=1;
   bind();
+  try{
+    var pv=JSON.parse(localStorage.getItem("PEND_V1")||"[]");
+    if(pv.length){
+      localStorage.removeItem("PEND_V1");
+      setTimeout(function(){ ask("前回、画面を閉じたときに保存の完了を確認できなかった操作があります:\n\n"+pv.map(function(x){return "・"+x.desc;}).join("\n")+"\n\n念のため、対象のパレットが思いどおりの状態になっているか確認してください。","保存の確認","わかった"); },800);
+    }
+  }catch(e){}
   var f0=document.getElementById("fabMove"); if(f0) f0.classList.add("show");
   var cached=null;
   try{ cached=JSON.parse(localStorage.getItem("SNAP_V1")||"null"); }catch(e){ cached=null; }
