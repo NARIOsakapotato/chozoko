@@ -510,9 +510,11 @@ function call(fn){
   var args=Array.prototype.slice.call(arguments,1);
   busy(true);
   var t0=(window.performance&&performance.now)?performance.now():Date.now();
-  var done=false; function fin(){ if(!done){ done=true; busy(false);
+  var ctl=(typeof AbortController!=="undefined")?new AbortController():null;
+  var tmo=setTimeout(function(){ try{ if(ctl) ctl.abort(); }catch(e){} }, window.CALL_TIMEOUT||30000);
+  var done=false; function fin(){ if(!done){ done=true; busy(false); clearTimeout(tmo);
     try{ perfLog_(fn,((window.performance&&performance.now)?performance.now():Date.now())-t0); }catch(e){} } }
-  return fetch(API_URL,{method:"POST",keepalive:true,body:JSON.stringify({key:API_KEY,fn:fn,args:args})})
+  return fetch(API_URL,{method:"POST",keepalive:true,signal:(ctl?ctl.signal:undefined),body:JSON.stringify({key:API_KEY,fn:fn,args:args})})
     .then(function(r){ return r.json(); })
     .then(function(j){
       fin();
@@ -521,7 +523,7 @@ function call(fn){
       if(String(msg).indexOf("合言葉")>=0) showLogin();
       throw new Error(msg);
     })
-    .catch(function(e){ fin(); throw e; });
+    .catch(function(e){ fin(); if(e&&e.name==="AbortError") throw new Error("通信がタイムアウトしました（電波状況をご確認ください）"); throw e; });
 }
 /* 軽量応答の補完: 全履歴・出荷明細はタブを開いたときにだけ取得 */
 var _fullBusy=false;
@@ -584,7 +586,7 @@ function pendUI_(){
 function pendAdd_(fn,args){
   var id="";
   if(args&&args.length){ var a0=args[0]; id=(a0&&typeof a0==="object")?(a0.id||a0.palletId||""):(typeof a0==="string"?a0:""); }
-  var it={k:Date.now()+Math.random(),desc:(MUT_NAMES[fn]||fn)+(id?(" "+id):"")};
+  var it={k:Date.now()+Math.random(),ts:Date.now(),desc:(MUT_NAMES[fn]||fn)+(id?(" "+id):"")};
   PEND.push(it); pendSave_(); pendUI_(); return it;
 }
 function pendDone_(it){ PEND=PEND.filter(function(x){return x.k!==it.k;}); pendSave_(); pendUI_(); }
@@ -598,11 +600,19 @@ function mutate(fn){
   }).catch(function(e){
     pendDone_(it);
     ask("「"+(it.desc)+"」の保存ができませんでした。\n\n"+(e&&e.message?e.message:e)+"\n\n画面をサーバーの最新状態に戻します。お手数ですが、もう一度やり直してください。","保存エラー","わかった");
-    return reload();
+    return reloadFull();
+  });
+}
+/* 失敗からの復帰用: 照合スキップなしで必ずフル取得 */
+function reloadFull(){
+  return enqueue(function(){
+    return call("getState").then(function(st){ if(!PEND.length) applyState(st,true); })
+      .catch(function(e){ toast("読込エラー: "+(e&&e.message?e.message:e)); });
   });
 }
 window.addEventListener("beforeunload",function(e){
-  if(PEND.length){ e.preventDefault(); e.returnValue="保存が完了していません"; }
+  var fresh=PEND.some(function(x){ return (Date.now()-(x.ts||0))<45000; });
+  if(fresh){ e.preventDefault(); e.returnValue="保存が完了していません"; }
 });
 function reload(){
   /* 保存キューの後ろに並ぶ: 未送信の保存を追い越して古い状態で上書きしない */
