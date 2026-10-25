@@ -605,11 +605,17 @@ window.addEventListener("beforeunload",function(e){
   if(PEND.length){ e.preventDefault(); e.returnValue="保存が完了していません"; }
 });
 function reload(){
-  return call("getStamp").then(function(s){
-    if(UI.stamp && s===UI.stamp){ document.getElementById("syncbar").classList.remove("on"); return; }
-    return call("getState").then(function(st){ applyState(st,true); });
-  }).catch(function(){
-    return call("getState").then(function(st){ applyState(st,true); }).catch(function(e){ toast("読込エラー: "+(e&&e.message?e.message:e)); });
+  /* 保存キューの後ろに並ぶ: 未送信の保存を追い越して古い状態で上書きしない */
+  return enqueue(function(){
+    return call("getStamp").then(function(s){
+      if(UI.stamp && s===UI.stamp){ document.getElementById("syncbar").classList.remove("on"); return; }
+      return call("getState").then(function(st){
+        if(PEND.length) return; /* 取得中に新しい操作が入ったら上書きしない */
+        applyState(st,true);
+      });
+    }).catch(function(){
+      return call("getState").then(function(st){ if(!PEND.length) applyState(st,true); }).catch(function(e){ toast("読込エラー: "+(e&&e.message?e.message:e)); });
+    });
   });
 }
 
