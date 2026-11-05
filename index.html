@@ -1414,6 +1414,9 @@ function stockSumData_(list){
   });
   return {cells:Object.keys(m).map(function(k){return m[k];}), totKg:totKg, totC:totC, totP:Object.keys(palSet).length};
 }
+var SUMOPEN={};
+try{ SUMOPEN=JSON.parse(localStorage.getItem("SUMOPEN_V1")||"{}"); }catch(e){ SUMOPEN={}; }
+function sumOpenSave_(){ try{ localStorage.setItem("SUMOPEN_V1",JSON.stringify(SUMOPEN)); }catch(e){} }
 function fmtKg_(x){ return Math.round(x).toLocaleString(); }
 function fmtC_(x){ return (Math.round(x*10)/10).toLocaleString(); }
 function pctBar_(x,t){
@@ -1432,20 +1435,23 @@ function renderStockSum(list){
       pals:(function(){var o={};byVar[vn].forEach(function(c){Object.keys(c.pals).forEach(function(k){o[k]=1;});});return Object.keys(o).length;})(),
       cells:byVar[vn]};
   }).sort(function(a,b){return b.kg-a.kg;});
+  var allOpen = vs.length>0 && vs.every(function(g){return !!SUMOPEN[g.v];});
   var filtered=!!($("#sVar").value||$("#sQ").value.trim()||$("#sArea").value);
   var h='<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin-bottom:8px">'
     +'<div><div class="fl">在庫合計</div><div style="font-size:28px;font-weight:700;line-height:1.1">'+(Math.round(d.totKg/100)/10).toLocaleString()+'<span style="font-size:14px;font-weight:400"> t</span></div>'
     +'<div class="muted" style="font-size:12px">'+fmtKg_(d.totKg)+' kg</div></div>'
     +'<div><div class="fl">カゴ</div><div style="font-size:22px;font-weight:700">'+fmtC_(d.totC)+'</div></div>'
     +'<div><div class="fl">パレット</div><div style="font-size:22px;font-weight:700">'+d.totP+'<span style="font-size:13px;font-weight:400"> 枚</span></div></div>'
+    +'<div><button class="btn sec" id="sSumToggleAll" style="padding:6px 12px">'+(allOpen?'内訳をすべて閉じる':'内訳をすべて開く')+'</button></div>'
     +(filtered?'<div><button class="btn sec" id="sSumClear" style="padding:6px 12px">一覧の絞り込みを解除</button></div>':'')
     +'</div>';
   h+='<div class="scroll"><table>';
   h+='<tr><th>品種 / 圃場</th><th class="num">kg</th><th style="min-width:100px">構成比</th><th class="num">カゴ</th><th class="num">パレット</th></tr>';
   if(!vs.length) h+='<tr><td colspan="5" class="muted">該当なし</td></tr>';
   vs.forEach(function(gv){
-    h+='<tr style="background:rgba(0,0,0,.045)"><td><b>'+esc(gv.v)+'</b></td><td class="num" style="font-size:15px"><b>'+fmtKg_(gv.kg)+'</b></td><td>'+pctBar_(gv.kg,d.totKg)+'</td><td class="num">'+fmtC_(gv.count)+'</td><td class="num">'+gv.pals+'</td></tr>';
-    gv.cells.sort(function(a,b){return b.kg-a.kg;}).forEach(function(c){
+    var open = !!SUMOPEN[gv.v];
+    h+='<tr style="background:rgba(0,0,0,.045);cursor:pointer" data-vg="'+esc(gv.v)+'"><td><span style="display:inline-block;width:16px;color:#7c756c">'+(open?'▼':'▶')+'</span><b>'+esc(gv.v)+'</b> <span class="muted" style="font-size:11px">'+gv.cells.length+'圃場</span></td><td class="num" style="font-size:15px"><b>'+fmtKg_(gv.kg)+'</b></td><td>'+pctBar_(gv.kg,d.totKg)+'</td><td class="num">'+fmtC_(gv.count)+'</td><td class="num">'+gv.pals+'</td></tr>';
+    if(open) gv.cells.sort(function(a,b){return b.kg-a.kg;}).forEach(function(c){
       var f=fld(c.fieldId)||{};
       h+='<tr style="cursor:pointer" data-sv="'+esc(gv.v)+'" data-sf="'+esc(c.fieldId)+'">'
         +'<td style="padding-left:24px">'+esc(f.short||f.name||c.fieldId||"（圃場不明）")+'</td>'
@@ -1455,6 +1461,11 @@ function renderStockSum(list){
   h+='<tr><td><b>合計</b></td><td class="num"><b>'+fmtKg_(d.totKg)+'</b></td><td></td><td class="num"><b>'+fmtC_(d.totC)+'</b></td><td class="num"><b>'+d.totP+'</b></td></tr>';
   h+='</table></div>';
   el.innerHTML=h;
+  $$("#sSum tr[data-vg]").forEach(function(tr){
+    tr.onclick=function(){ var k=tr.dataset.vg; SUMOPEN[k]=!SUMOPEN[k]; sumOpenSave_(); renderStockSum(list); };
+  });
+  var ta=document.getElementById("sSumToggleAll");
+  if(ta) ta.onclick=function(){ var all=vs.length>0&&vs.every(function(g){return !!SUMOPEN[g.v];}); vs.forEach(function(g){ SUMOPEN[g.v]=!all; }); sumOpenSave_(); renderStockSum(list); };
   $$("#sSum tr[data-sv]").forEach(function(tr){
     tr.onclick=function(){
       $("#sVar").value = tr.dataset.sv==="（品種未設定）" ? "" : tr.dataset.sv;
