@@ -253,8 +253,10 @@ body.movebar-open #fabMove{bottom:118px}
       <div style="max-width:130px"><label class="fl">エリア</label><select id="sArea"><option value="">すべて</option></select></div>
       <div><label class="fl">検索（番号/圃場/メモ）</label><input type="text" id="sQ"></div>
       <div style="max-width:150px"><label class="fl">並び順</label><select id="sSort"><option value="loc">場所順</option><option value="old">収穫が古い順</option><option value="new">入庫が新しい順</option></select></div>
-      <div style="flex:0 0 auto"><button class="btn sec" id="sCsv">在庫CSV出力</button></div>
+      <div style="flex:0 0 auto"><button class="btn sec" id="sCsv">在庫CSV出力</button> <button class="btn sec" id="sSumCsv">まとめCSV</button></div>
     </div>
+    <div id="sSum" style="margin-bottom:10px"></div>
+    <div class="fl" style="margin:2px 0 4px">パレット一覧</div>
     <div class="scroll"><table id="sTbl"></table></div>
   </div>
 </section>
@@ -1390,6 +1392,91 @@ function renderStock(){
   });
   $("#sTbl").innerHTML=h;
   $$("#sTbl tr[data-p]").forEach(function(el){el.onclick=function(){openPallet(el.dataset.p);};});
+  /* まとめは 貯蔵庫/等級/洗浄 のフィルタだけ反映（品種・検索は下の一覧の絞り込みに使う） */
+  var base=inStock();
+  if(w) base=base.filter(function(p){return String(p.wh)===w;});
+  if(g) base=base.filter(function(p){return (p.grade||"")===(g==="__none__"?"":g);});
+  if(wm==="w") base=base.filter(function(p){return !!p.washed;});
+  if(wm==="d") base=base.filter(function(p){return !p.washed;});
+  renderStockSum(base);
+}
+function stockSumData_(list){
+  var m={}, totKg=0, totC=0, palSet={};
+  list.forEach(function(p){
+    p.lines.forEach(function(l){
+      var vv=l.variety||"（品種未設定）", fid=l.fieldId||"";
+      var k=vv+"|"+fid;
+      if(!m[k]) m[k]={variety:vv, fieldId:fid, count:0, kg:0, pals:{}};
+      var c=Number(l.count)||0;
+      m[k].count+=c; m[k].kg+=c*S.config.unitWeightKg; m[k].pals[p.id]=1;
+      totKg+=c*S.config.unitWeightKg; totC+=c; palSet[p.id]=1;
+    });
+  });
+  return {cells:Object.keys(m).map(function(k){return m[k];}), totKg:totKg, totC:totC, totP:Object.keys(palSet).length};
+}
+function renderStockSum(list){
+  var el=document.getElementById("sSum"); if(!el) return;
+  var d=stockSumData_(list);
+  var byVar={};
+  d.cells.forEach(function(c){ (byVar[c.variety]=byVar[c.variety]||[]).push(c); });
+  var vs=Object.keys(byVar).map(function(vn){
+    return {v:vn,
+      kg:byVar[vn].reduce(function(a,c){return a+c.kg;},0),
+      count:byVar[vn].reduce(function(a,c){return a+c.count;},0),
+      pals:(function(){var o={};byVar[vn].forEach(function(c){Object.keys(c.pals).forEach(function(k){o[k]=1;});});return Object.keys(o).length;})(),
+      cells:byVar[vn]};
+  }).sort(function(a,b){return b.kg-a.kg;});
+  var filtered=!!($("#sVar").value||$("#sQ").value.trim()||$("#sArea").value);
+  var h='<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin-bottom:8px">'
+    +'<div><div class="fl">在庫合計</div><div style="font-size:26px;font-weight:700;line-height:1.1">'+r1(d.totKg).toLocaleString()+'<span style="font-size:13px;font-weight:400"> kg</span></div></div>'
+    +'<div><div class="fl">カゴ</div><div style="font-size:20px;font-weight:700">'+r2(d.totC).toLocaleString()+'</div></div>'
+    +'<div><div class="fl">パレット</div><div style="font-size:20px;font-weight:700">'+d.totP+'</div></div>'
+    +(filtered?'<div><button class="btn sec" id="sSumClear" style="padding:6px 12px">一覧の絞り込みを解除</button></div>':'')
+    +'</div>';
+  h+='<div class="scroll"><table>';
+  h+='<tr><th>品種 / 圃場</th><th class="num">kg</th><th class="num">カゴ</th><th class="num">パレット</th></tr>';
+  if(!vs.length) h+='<tr><td colspan="4" class="muted">該当なし</td></tr>';
+  vs.forEach(function(gv){
+    h+='<tr style="background:rgba(0,0,0,.045)"><td><b>'+esc(gv.v)+'</b></td><td class="num"><b>'+r1(gv.kg).toLocaleString()+'</b></td><td class="num">'+r2(gv.count).toLocaleString()+'</td><td class="num">'+gv.pals+'</td></tr>';
+    gv.cells.sort(function(a,b){return b.kg-a.kg;}).forEach(function(c){
+      var f=fld(c.fieldId)||{};
+      h+='<tr style="cursor:pointer" data-sv="'+esc(gv.v)+'" data-sf="'+esc(c.fieldId)+'">'
+        +'<td style="padding-left:24px">'+esc(f.short||f.name||c.fieldId||"（圃場不明）")+'</td>'
+        +'<td class="num">'+r1(c.kg).toLocaleString()+'</td><td class="num">'+r2(c.count).toLocaleString()+'</td><td class="num">'+Object.keys(c.pals).length+'</td></tr>';
+    });
+  });
+  h+='<tr><td><b>合計</b></td><td class="num"><b>'+r1(d.totKg).toLocaleString()+'</b></td><td class="num"><b>'+r2(d.totC).toLocaleString()+'</b></td><td class="num"><b>'+d.totP+'</b></td></tr>';
+  h+='</table></div>';
+  el.innerHTML=h;
+  $$("#sSum tr[data-sv]").forEach(function(tr){
+    tr.onclick=function(){
+      $("#sVar").value = tr.dataset.sv==="（品種未設定）" ? "" : tr.dataset.sv;
+      if($("#sVar").value!==tr.dataset.sv && tr.dataset.sv!=="（品種未設定）") $("#sVar").value="";
+      $("#sQ").value = tr.dataset.sf;
+      renderStock();
+      toast("下の一覧を絞り込み: "+tr.dataset.sv+" ／ "+tr.dataset.sf);
+    };
+  });
+  var cl=document.getElementById("sSumClear");
+  if(cl) cl.onclick=function(){ $("#sVar").value=""; $("#sArea").value=""; $("#sQ").value=""; renderStock(); };
+  var sc=document.getElementById("sSumCsv");
+  if(sc) sc.onclick=csvStockSum;
+}
+function csvStockSum(){
+  var w=$("#sWh").value,g=$("#sGrade").value,wm=$("#sWash").value;
+  var base=inStock();
+  if(w) base=base.filter(function(p){return String(p.wh)===w;});
+  if(g) base=base.filter(function(p){return (p.grade||"")===(g==="__none__"?"":g);});
+  if(wm==="w") base=base.filter(function(p){return !!p.washed;});
+  if(wm==="d") base=base.filter(function(p){return !p.washed;});
+  var d=stockSumData_(base);
+  var rows=[["品種","圃場ID","圃場名","エリア","kg","カゴ","パレット数"]];
+  d.cells.sort(function(a,b){return a.variety===b.variety ? b.kg-a.kg : (a.variety<b.variety?-1:1);}).forEach(function(c){
+    var f=fld(c.fieldId)||{};
+    rows.push([c.variety,c.fieldId,f.name||"",f.area||"",r1(c.kg),c.count,Object.keys(c.pals).length]);
+  });
+  rows.push(["合計","","","",r1(d.totKg),d.totC,d.totP]);
+  dl("在庫まとめ",rows);
 }
 
 /* ---------- 集計 ---------- */
