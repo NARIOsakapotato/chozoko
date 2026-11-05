@@ -595,7 +595,7 @@ function mutate(fn){
   var it=pendAdd_(fn,args);
   return enqueue(function(){ return call.apply(null,[fn].concat(args)); }).then(function(st){
     pendDone_(it);
-    if(st && st.light){ if(st.stamp) UI.stamp=st.stamp; renderKPI(); return st; }
+    if(st && st.light){ if(st.stamp) UI.stamp=st.stamp; S.lite=1; renderKPI(); return st; }
     applyState(st); return st;
   }).catch(function(e){
     pendDone_(it);
@@ -1114,7 +1114,16 @@ function doIntake(cont){
   renderAll();
   toast("入庫しました（保存中…）");
   if(!cont) switchTab("map");
-  enqueue(function(){ return call("createPallet",payload); }).then(applyState).catch(function(e){
+  enqueue(function(){ return call("createPallet",payload); }).then(function(st){
+    if(st && st.light){
+      if(st.id) temp.id=st.id;
+      delete temp._tmp;
+      if(st.stamp) UI.stamp=st.stamp;
+      S.lite=1; renderAll();
+      return st;
+    }
+    applyState(st); return st;
+  }).catch(function(e){
     S.pallets=S.pallets.filter(function(x){return x!==temp;});
     renderAll();
     toast("入庫の保存に失敗しました: "+(e&&e.message?e.message:e));
@@ -1239,7 +1248,10 @@ function doShip(){
   if(p.status!=="在庫"){ closeDrawer(); hidePeek(); } else openPallet(p.id);
   renderAll();
   toast(kind==="洗浄"?cnt+"カゴを洗浄向けに全量出庫しました。洗浄が済んだら入庫タブで「洗浄済 💧」を選んで入庫し直してください":cnt+"カゴを出庫記録しました（保存中…）");
-  enqueue(function(){ return call("shipPallet",payload); }).then(applyState).catch(function(e){
+  enqueue(function(){ return call("shipPallet",payload); }).then(function(st){
+    if(st && st.light){ if(st.stamp) UI.stamp=st.stamp; S.lite=1; renderKPI(); return st; }
+    applyState(st); return st;
+  }).catch(function(e){
     for(var si=0;si<S.pallets.length;si++){ if(S.pallets[si].id===snap.id){ S.pallets[si]=snap; break; } }
     renderAll();
     toast("出庫の保存に失敗しました: "+(e&&e.message?e.message:e));
@@ -2542,9 +2554,24 @@ function doQuick(){
   renderAll();
   toast(sl.length+"枚 登録しました（保存中…）");
   enqueue(function(){ return call("createPalletsBulk", payload, sl.length); }).then(function(st){
-    applyState(st);
+    if(st && st.light){
+      var pl=st.placed||[];
+      for(var pi=0;pi<temps.length;pi++){
+        if(pi<pl.length){
+          temps[pi].id=pl[pi].id; temps[pi].wh=pl[pi].wh;
+          temps[pi].loc=(pl[pi].r>0)?{r:pl[pi].r,c:pl[pi].c,t:pl[pi].t}:null;
+          delete temps[pi]._tmp;
+        } else {
+          (function(tp){ S.pallets=S.pallets.filter(function(x){return x!==tp;}); })(temps[pi]);
+        }
+      }
+      if(st.stamp) UI.stamp=st.stamp;
+      S.lite=1; renderAll();
+    } else {
+      applyState(st);
+    }
     var ids=(st&&st.createdIds)||[];
-    if(ids.length) toast(sl.length+"枚 登録しました（"+ids[0]+(ids.length>1?"〜"+ids[ids.length-1]:"")+"）");
+    if(ids.length) toast(ids.length+"枚 登録しました（"+ids[0]+(ids.length>1?"〜"+ids[ids.length-1]:"")+"）");
   }).catch(function(e){
     S.pallets=S.pallets.filter(function(x){return temps.indexOf(x)<0;});
     renderAll();
