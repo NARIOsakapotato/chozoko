@@ -1414,6 +1414,12 @@ function stockSumData_(list){
   });
   return {cells:Object.keys(m).map(function(k){return m[k];}), totKg:totKg, totC:totC, totP:Object.keys(palSet).length};
 }
+function fmtKg_(x){ return Math.round(x).toLocaleString(); }
+function fmtC_(x){ return (Math.round(x*10)/10).toLocaleString(); }
+function pctBar_(x,t){
+  var p = t>0 ? Math.round(x*100/t) : 0;
+  return '<div style="display:flex;align-items:center;gap:6px"><div style="flex:1;min-width:60px;height:8px;background:rgba(0,0,0,.08);border-radius:4px;overflow:hidden"><div style="width:'+p+'%;height:100%;background:#b4885a"></div></div><span style="font-size:11px;color:#7c756c;min-width:30px;text-align:right">'+p+'%</span></div>';
+}
 function renderStockSum(list){
   var el=document.getElementById("sSum"); if(!el) return;
   var d=stockSumData_(list);
@@ -1428,24 +1434,25 @@ function renderStockSum(list){
   }).sort(function(a,b){return b.kg-a.kg;});
   var filtered=!!($("#sVar").value||$("#sQ").value.trim()||$("#sArea").value);
   var h='<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin-bottom:8px">'
-    +'<div><div class="fl">在庫合計</div><div style="font-size:26px;font-weight:700;line-height:1.1">'+r1(d.totKg).toLocaleString()+'<span style="font-size:13px;font-weight:400"> kg</span></div></div>'
-    +'<div><div class="fl">カゴ</div><div style="font-size:20px;font-weight:700">'+r2(d.totC).toLocaleString()+'</div></div>'
-    +'<div><div class="fl">パレット</div><div style="font-size:20px;font-weight:700">'+d.totP+'</div></div>'
+    +'<div><div class="fl">在庫合計</div><div style="font-size:28px;font-weight:700;line-height:1.1">'+(Math.round(d.totKg/100)/10).toLocaleString()+'<span style="font-size:14px;font-weight:400"> t</span></div>'
+    +'<div class="muted" style="font-size:12px">'+fmtKg_(d.totKg)+' kg</div></div>'
+    +'<div><div class="fl">カゴ</div><div style="font-size:22px;font-weight:700">'+fmtC_(d.totC)+'</div></div>'
+    +'<div><div class="fl">パレット</div><div style="font-size:22px;font-weight:700">'+d.totP+'<span style="font-size:13px;font-weight:400"> 枚</span></div></div>'
     +(filtered?'<div><button class="btn sec" id="sSumClear" style="padding:6px 12px">一覧の絞り込みを解除</button></div>':'')
     +'</div>';
   h+='<div class="scroll"><table>';
-  h+='<tr><th>品種 / 圃場</th><th class="num">kg</th><th class="num">カゴ</th><th class="num">パレット</th></tr>';
-  if(!vs.length) h+='<tr><td colspan="4" class="muted">該当なし</td></tr>';
+  h+='<tr><th>品種 / 圃場</th><th class="num">kg</th><th style="min-width:100px">構成比</th><th class="num">カゴ</th><th class="num">パレット</th></tr>';
+  if(!vs.length) h+='<tr><td colspan="5" class="muted">該当なし</td></tr>';
   vs.forEach(function(gv){
-    h+='<tr style="background:rgba(0,0,0,.045)"><td><b>'+esc(gv.v)+'</b></td><td class="num"><b>'+r1(gv.kg).toLocaleString()+'</b></td><td class="num">'+r2(gv.count).toLocaleString()+'</td><td class="num">'+gv.pals+'</td></tr>';
+    h+='<tr style="background:rgba(0,0,0,.045)"><td><b>'+esc(gv.v)+'</b></td><td class="num" style="font-size:15px"><b>'+fmtKg_(gv.kg)+'</b></td><td>'+pctBar_(gv.kg,d.totKg)+'</td><td class="num">'+fmtC_(gv.count)+'</td><td class="num">'+gv.pals+'</td></tr>';
     gv.cells.sort(function(a,b){return b.kg-a.kg;}).forEach(function(c){
       var f=fld(c.fieldId)||{};
       h+='<tr style="cursor:pointer" data-sv="'+esc(gv.v)+'" data-sf="'+esc(c.fieldId)+'">'
         +'<td style="padding-left:24px">'+esc(f.short||f.name||c.fieldId||"（圃場不明）")+'</td>'
-        +'<td class="num">'+r1(c.kg).toLocaleString()+'</td><td class="num">'+r2(c.count).toLocaleString()+'</td><td class="num">'+Object.keys(c.pals).length+'</td></tr>';
+        +'<td class="num">'+fmtKg_(c.kg)+'</td><td>'+pctBar_(c.kg,d.totKg)+'</td><td class="num">'+fmtC_(c.count)+'</td><td class="num">'+Object.keys(c.pals).length+'</td></tr>';
     });
   });
-  h+='<tr><td><b>合計</b></td><td class="num"><b>'+r1(d.totKg).toLocaleString()+'</b></td><td class="num"><b>'+r2(d.totC).toLocaleString()+'</b></td><td class="num"><b>'+d.totP+'</b></td></tr>';
+  h+='<tr><td><b>合計</b></td><td class="num"><b>'+fmtKg_(d.totKg)+'</b></td><td></td><td class="num"><b>'+fmtC_(d.totC)+'</b></td><td class="num"><b>'+d.totP+'</b></td></tr>';
   h+='</table></div>';
   el.innerHTML=h;
   $$("#sSum tr[data-sv]").forEach(function(tr){
