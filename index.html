@@ -256,8 +256,8 @@ body.movebar-open #fabMove{bottom:118px}
       <div style="flex:0 0 auto"><button class="btn sec" id="sCsv">在庫CSV出力</button> <button class="btn sec" id="sSumCsv">まとめCSV</button></div>
     </div>
     <div id="sSum" style="margin-bottom:10px"></div>
-    <div class="fl" style="margin:2px 0 4px">パレット一覧</div>
-    <div class="scroll"><table id="sTbl"></table></div>
+    <button class="btn sec" id="sListToggle" style="width:100%;padding:11px 12px;margin:2px 0 6px;text-align:left;font-size:14px"></button>
+    <div id="sListWrap" style="display:none"><div class="scroll"><table id="sTbl"></table></div></div>
   </div>
 </section>
 
@@ -1392,6 +1392,20 @@ function renderStock(){
   });
   $("#sTbl").innerHTML=h;
   $$("#sTbl tr[data-p]").forEach(function(el){el.onclick=function(){openPallet(el.dataset.p);};});
+  /* パレット一覧はふだん閉じておく（絞り込み中は自動で開く） */
+  var forceOpen = !!($("#sVar").value||$("#sQ").value.trim()||$("#sArea").value);
+  var lw=document.getElementById("sListWrap"), lt=document.getElementById("sListToggle");
+  if(lw&&lt){
+    var openL = forceOpen || !!window.SLIST_OPEN;
+    lw.style.display = openL ? "" : "none";
+    lt.textContent = (openL?"▼":"▶")+" パレット一覧（"+rows.length+"件）"+(forceOpen?"・絞り込み中（タップで解除）":"");
+    lt.onclick=function(){
+      if(forceOpen){ $("#sVar").value=""; $("#sArea").value=""; $("#sQ").value=""; window.SLIST_OPEN=false; }
+      else window.SLIST_OPEN=!window.SLIST_OPEN;
+      try{ localStorage.setItem("SLIST_V1", window.SLIST_OPEN?"1":"0"); }catch(e){}
+      renderStock();
+    };
+  }
   /* まとめは 貯蔵庫/等級/洗浄 のフィルタだけ反映（品種・検索は下の一覧の絞り込みに使う） */
   var base=inStock();
   if(w) base=base.filter(function(p){return String(p.wh)===w;});
@@ -1414,6 +1428,7 @@ function stockSumData_(list){
   });
   return {cells:Object.keys(m).map(function(k){return m[k];}), totKg:totKg, totC:totC, totP:Object.keys(palSet).length};
 }
+window.SLIST_OPEN=(function(){ try{ return localStorage.getItem("SLIST_V1")==="1"; }catch(e){ return false; } })();
 var SUMOPEN={};
 try{ SUMOPEN=JSON.parse(localStorage.getItem("SUMOPEN_V1")||"{}"); }catch(e){ SUMOPEN={}; }
 function sumOpenSave_(){ try{ localStorage.setItem("SUMOPEN_V1",JSON.stringify(SUMOPEN)); }catch(e){} }
