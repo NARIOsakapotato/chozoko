@@ -1460,6 +1460,27 @@ function renderStockSum(list){
     +'<div><button class="btn sec" id="sSumToggleAll" style="padding:6px 12px">'+(allOpen?'内訳をすべて閉じる':'内訳をすべて開く')+'</button></div>'
     +(filtered?'<div><button class="btn sec" id="sSumClear" style="padding:6px 12px">一覧の絞り込みを解除</button></div>':'')
     +'</div>';
+  /* 等級（サイズ）別の量（タップでその等級に絞り込み） */
+  var gBase=inStock();
+  var sw_=$("#sWh").value, sm_=$("#sWash").value;
+  if(sw_) gBase=gBase.filter(function(p){return String(p.wh)===sw_;});
+  if(sm_==="w") gBase=gBase.filter(function(p){return !!p.washed;});
+  if(sm_==="d") gBase=gBase.filter(function(p){return !p.washed;});
+  var gm={};
+  gBase.forEach(function(p){ var k=p.grade||"未選別"; gm[k]=(gm[k]||0)+pKg(p); });
+  var gsel=$("#sGrade").value;
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+  GRADES.concat(["未選別"]).forEach(function(gn){
+    var kg=gm[gn]; if(!kg) return;
+    var val=(gn==="未選別")?"__none__":gn;
+    var on=(gsel===val);
+    var col=GRADE_COLOR[gn==="未選別"?"":gn]||"#c9c3ba";
+    var amt= kg>=1000 ? (Math.round(kg/100)/10).toLocaleString()+" t" : Math.round(kg).toLocaleString()+" kg";
+    h+='<span data-gc="'+esc(val)+'" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:'+col+'33;border:'+(on?'2px solid #6b4a21':'1px solid rgba(0,0,0,.12)')+'">'
+      +'<span style="width:10px;height:10px;border-radius:50%;background:'+col+'"></span>'
+      +'<b>'+esc(gn)+'</b> <span style="font-variant-numeric:tabular-nums">'+amt+'</span></span>';
+  });
+  h+='</div>';
   h+='<div class="scroll"><table>';
   h+='<tr><th>品種 / 圃場</th><th class="num">kg</th><th style="min-width:100px">構成比</th><th class="num">カゴ</th><th class="num">パレット</th></tr>';
   if(!vs.length) h+='<tr><td colspan="5" class="muted">該当なし</td></tr>';
@@ -1494,6 +1515,13 @@ function renderStockSum(list){
   if(cl) cl.onclick=function(){ $("#sVar").value=""; $("#sArea").value=""; $("#sQ").value=""; renderStock(); };
   var sc=document.getElementById("sSumCsv");
   if(sc) sc.onclick=csvStockSum;
+  $$("#sSum [data-gc]").forEach(function(ch){
+    ch.onclick=function(){
+      var vv=ch.dataset.gc;
+      $("#sGrade").value = ($("#sGrade").value===vv) ? "" : vv;
+      renderStock();
+    };
+  });
 }
 function csvStockSum(){
   var w=$("#sWh").value,g=$("#sGrade").value,wm=$("#sWash").value;
